@@ -20,6 +20,7 @@
     .note { font-size: 13px; color: #a15c00; background: #fff7e6; border-radius: 8px; padding: 8px 10px; margin-top: 12px; }
     .warn { font-size: 14px; color: #b00020; background: #fdecee; border-radius: 8px; padding: 8px 10px; margin-top: 12px; }
     .adj { font-size: 12px; color: #a15c00; }
+    .more { font-size: 13px; color: #777; }
     .hidden { display: none; }
   </style>
   </head>
@@ -59,6 +60,7 @@
   <script>
   // ===== 佣金資料:日後只需修改這一段 =====
   // rates:   [由第幾年, 至第幾年, 佣金%]
+  //          佣金表沒有列出的年度不會計算,並會在表格底部提示
   // payYears: 繳費年數;null 代表每年續保
   // maxAge:  最高投保年齡(可省略)
   // ageRule: 高齡首年佣金下調(可省略)
@@ -67,10 +69,34 @@
   //          capAge = 下調至此年齡為止,其後維持不變
   const PRODUCTS = [
     {
-      name: 'Wealth Elite Life Insurance Plan 3',
-      note: '高齡佣金下調規則未輸入,請對照原文件佣金表。',
+      name: '「財富恆裕」人壽保險計劃 3 (Wealth Elite Life Insurance Plan 3)',
       terms: [
         { label: '整付', payYears: 1, maxAge: 75, rates: [[1, 1, 4.0]] }
+      ]
+    },
+    {
+      name: '「財富源源」壽險計劃 (Wealth Generation)',
+      terms: [
+        { label: '整付', payYears: 1, maxAge: 80,
+          rates: [[1, 1, 3.0]],
+          ageRule: { over: 65, minusPerYear: 0.1, capAge: 75 } }
+      ]
+    },
+    {
+      name: '優悅年金保險計劃 (EverBliss Annuity Insurance Plan)',
+      terms: [
+        // 71 至 75 歲首年佣金固定 3%:以「超過 70 歲一次過減 0.2」表達
+        { label: '整付', payYears: 1, maxAge: 75,
+          rates: [[1, 1, 3.2]],
+          ageRule: { over: 70, minusPerYear: 0.2, capAge: 71 } }
+      ]
+    },
+    {
+      name: 'AIA 延期年金計劃 2 (AIA Deferred Annuity Plan 2)',
+      note: '佣金表只列至第 5 年,這裡按 5 年繳計算。未包括 Persistency & Career Benefit、Extra 10% 及附加契約佣金。',
+      terms: [
+        { label: '5年繳', payYears: 5,
+          rates: [[1, 1, 15], [2, 2, 1], [3, 5, 1]] }
       ]
     },
     {
@@ -83,6 +109,70 @@
         { label: '5年繳', payYears: 5, maxAge: 75,
           rates: [[1, 1, 25], [2, 2, 5], [3, 5, 2]],
           ageRule: { over: 65, minusPerYear: 1, capAge: 70 } }
+      ]
+    },
+    {
+      name: '財富盈活儲蓄保險計劃 (Wealth Flexi)',
+      note: '5 年繳佣金率已合併基本佣金及優質業務獎金(首年 16.95% + 8.05%,第 2 年 2% + 3%)。未包括 Persistency & Career Benefit 及 Extra 10%(只適用於 5 年繳)。',
+      terms: [
+        { label: '整付', payYears: 1, maxAge: 85,
+          rates: [[1, 1, 3.5]],
+          ageRule: { over: 69, minusPerYear: 0.1, capAge: 74 } },
+        { label: '5年繳', payYears: 5, maxAge: 80,
+          rates: [[1, 1, 25], [2, 2, 5], [3, 5, 2]],
+          ageRule: { over: 69, minusPerYear: 1, capAge: 74 } }
+      ]
+    },
+    {
+      name: '「盈御多元貨幣計劃 3」(Global Power Multi-Currency Plan 3)',
+      note: '未包括 Persistency & Career Benefit、Extra 10%(不適用於整付)及附加契約佣金。',
+      terms: [
+        { label: '整付', payYears: 1, maxAge: 80,
+          rates: [[1, 1, 3.5]],
+          ageRule: { over: 65, minusPerYear: 0.1, capAge: 70 } },
+        { label: '3年繳', payYears: 3, maxAge: 75,
+          rates: [[1, 1, 11], [2, 3, 0]],
+          ageRule: { over: 65, minusPerYear: 0.3, capAge: 70 } },
+        { label: '5年繳', payYears: 5, maxAge: 75,
+          rates: [[1, 1, 25], [2, 2, 5], [3, 5, 2]],
+          ageRule: { over: 65, minusPerYear: 1, capAge: 70 } },
+        { label: '10年繳', payYears: 10, maxAge: 70,
+          rates: [[1, 1, 35], [2, 2, 10], [3, 6, 3]],
+          ageRule: { over: 65, minusPerYear: 1, capAge: 70 } }
+      ]
+    },
+    {
+      name: '「活然人生」保險計劃 (ProsperLife)',
+      note: '佣金率已合併基本佣金及優質業務獎金(香港區;澳門區總數相同)。未包括 Persistency & Career Benefit、Extra 10%、Provident Fund(第 7 年起)及附加契約佣金。',
+      terms: [
+        { label: '5年繳', payYears: 5,
+          rates: [[1, 1, 25], [2, 2, 5], [3, 5, 2]] },
+        { label: '30年繳', payYears: 30,
+          rates: [[1, 1, 54], [2, 2, 18], [3, 6, 3]] }
+      ]
+    },
+    {
+      name: '「簡緻.愛伴航」保險計劃 (Essence - On Your Side)',
+      note: '未包括個人續保佣金花紅、Extra 10%、公積金及附加契約佣金。',
+      terms: [
+        { label: '10年繳', payYears: 10,
+          rates: [[1, 1, 30], [2, 2, 5], [3, 6, 3]] },
+        { label: '18年繳', payYears: 18,
+          rates: [[1, 1, 50], [2, 2, 10], [3, 6, 3]] },
+        { label: '25年繳', payYears: 25,
+          rates: [[1, 1, 54], [2, 2, 15], [3, 6, 3]] }
+      ]
+    },
+    {
+      name: '「愛伴航」保險計劃 2 (On Your Side Insurance Plan 2)',
+      note: '只計算定期保費;額外保費的佣金為 5%,請另行計算。未包括個人續保佣金花紅、Extra 10%、公積金及附加契約佣金。',
+      terms: [
+        { label: '10年繳', payYears: 10,
+          rates: [[1, 1, 30], [2, 2, 5], [3, 6, 3]] },
+        { label: '18年繳', payYears: 18,
+          rates: [[1, 1, 50], [2, 2, 10], [3, 6, 3]] },
+        { label: '25年繳', payYears: 25,
+          rates: [[1, 1, 54], [2, 2, 15], [3, 6, 3]] }
       ]
     },
     {
@@ -140,7 +230,9 @@
     }
     $('warn').classList.add('hidden');
 
-    const years = renewable ? (parseInt($('projYears').value) || 1) : t.payYears;
+    const fullYears = renewable ? (parseInt($('projYears').value) || 1) : t.payYears;
+    const lastRateYear = Math.max(...t.rates.map(r => r[1]));
+    const years = Math.min(fullYears, lastRateYear);
     const rule = t.ageRule;
     let total = 0, html = '';
     for (let y = 1; y <= years; y++) {
@@ -154,6 +246,9 @@
       const c = premium * rate / 100;
       total += c;
       html += `<tr><td>第 ${y} 年</td><td>${fmt(premium)}</td><td>${rate}%${adjusted ? '<br><span class="adj">已按年齡下調</span>' : ''}</td><td>${fmt(c)}</td></tr>`;
+    }
+    if (years < fullYears) {
+      html += `<tr><td colspan="4" class="more">第 ${years + 1} 至 ${fullYears} 年:佣金表未列出,未計算。</td></tr>`;
     }
     $('rows').innerHTML = html;
     $('total').textContent = '總佣金:' + fmt(total);
