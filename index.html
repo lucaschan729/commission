@@ -1,0 +1,167 @@
+  <!DOCTYPE html>
+  <html lang="zh-HK">
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>佣金計算機</title>
+  <style>
+    body { font-family: -apple-system, "PingFang HK", "Microsoft JhengHei", sans-serif; background: #f4f5f7; margin: 0; padding: 20px; color: #222; }
+    .card { max-width: 720px; margin: 0 auto 16px; background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+    h1 { font-size: 22px; margin: 0 0 16px; }
+    label { display: block; font-size: 14px; color: #555; margin: 12px 0 4px; }
+    select, input { width: 100%; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+    .row { display: flex; gap: 12px; }
+    .row > div { flex: 1; }
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+    th, td { padding: 8px; text-align: right; border-bottom: 1px solid #eee; font-size: 15px; }
+    th:first-child, td:first-child { text-align: left; }
+    th { background: #fafafa; color: #555; }
+    .total { font-size: 20px; font-weight: bold; color: #c8102e; margin-top: 14px; text-align: right; }
+    .note { font-size: 13px; color: #a15c00; background: #fff7e6; border-radius: 8px; padding: 8px 10px; margin-top: 12px; }
+    .warn { font-size: 14px; color: #b00020; background: #fdecee; border-radius: 8px; padding: 8px 10px; margin-top: 12px; }
+    .adj { font-size: 12px; color: #a15c00; }
+    .hidden { display: none; }
+  </style>
+  </head>
+  <body>
+  <div class="card">
+    <h1>佣金計算機</h1>
+    <label>產品</label>
+    <select id="product"></select>
+    <label>繳費方式</label>
+    <select id="term"></select>
+    <div class="row">
+      <div>
+        <label id="premiumLabel">年繳保費</label>
+        <input id="premium" type="number" min="0" value="100000">
+      </div>
+      <div>
+        <label>投保年齡</label>
+        <input id="age" type="number" min="0" max="100" value="40">
+      </div>
+    </div>
+    <div id="projWrap" class="hidden">
+      <label>預測年數(每年續保產品)</label>
+      <input id="projYears" type="number" min="1" max="50" value="20">
+    </div>
+    <div id="note" class="note hidden"></div>
+    <div id="warn" class="warn hidden"></div>
+  </div>
+
+  <div class="card">
+    <table>
+      <thead><tr><th>保單年度</th><th>保費</th><th>佣金率</th><th>佣金</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <div class="total" id="total"></div>
+  </div>
+
+  <script>
+  // ===== 佣金資料:日後只需修改這一段 =====
+  // rates:   [由第幾年, 至第幾年, 佣金%]
+  // payYears: 繳費年數;null 代表每年續保
+  // maxAge:  最高投保年齡(可省略)
+  // ageRule: 高齡首年佣金下調(可省略)
+  //          over = 超過此年齡開始下調
+  //          minusPerYear = 每大一歲減多少個百分點
+  //          capAge = 下調至此年齡為止,其後維持不變
+  const PRODUCTS = [
+    {
+      name: 'Wealth Elite Life Insurance Plan 3',
+      note: '高齡佣金下調規則未輸入,請對照原文件佣金表。',
+      terms: [
+        { label: '整付', payYears: 1, maxAge: 75, rates: [[1, 1, 4.0]] }
+      ]
+    },
+    {
+      name: '環宇盈活儲蓄保險計劃 (GlobalFlexi)',
+      note: '未包括 Persistency & Career Benefit、Extra 10%(只適用於 5 年繳)及附加契約佣金。',
+      terms: [
+        { label: '整付', payYears: 1, maxAge: 80,
+          rates: [[1, 1, 3.5]],
+          ageRule: { over: 65, minusPerYear: 0.1, capAge: 70 } },
+        { label: '5年繳', payYears: 5, maxAge: 75,
+          rates: [[1, 1, 25], [2, 2, 5], [3, 5, 2]],
+          ageRule: { over: 65, minusPerYear: 1, capAge: 70 } }
+      ]
+    },
+    {
+      name: '啟護您 – 癌症藥物保障 (FutureShield)',
+      note: '保費會隨年齡遞增,這裡以固定保費估算。高齡下調暫按「65 歲以上每歲減 2 個百分點」計算,請對照原文件佣金表。',
+      terms: [
+        { label: '每年續保', payYears: null, maxAge: 75,
+          rates: [[1, 1, 46], [2, 2, 17], [3, 10, 5], [11, 15, 1.5], [16, 999, 3]],
+          ageRule: { over: 65, minusPerYear: 2, capAge: 75 } }
+      ]
+    }
+    // 在此加入其他產品,例如:
+    // { name: '定期壽險計劃 (Term Plan)', terms: [
+    //   { label: '25年繳', payYears: 25, maxAge: 60, rates: [[1,1,0],[2,25,0]] }
+    // ] }
+  ];
+  // ===== 資料結束 =====
+
+  const $ = id => document.getElementById(id);
+  const fmt = n => n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const round2 = n => Math.round(n * 100) / 100;
+
+  PRODUCTS.forEach((p, i) => $('product').add(new Option(p.name, i)));
+
+  function loadTerms() {
+    const p = PRODUCTS[$('product').value];
+    $('term').innerHTML = '';
+    p.terms.forEach((t, i) => $('term').add(new Option(t.label, i)));
+    calc();
+  }
+
+  function rateFor(rates, year) {
+    const r = rates.find(x => year >= x[0] && year <= x[1]);
+    return r ? r[2] : 0;
+  }
+
+  function calc() {
+    const p = PRODUCTS[$('product').value];
+    const t = p.terms[$('term').value];
+    const premium = parseFloat($('premium').value) || 0;
+    const age = parseInt($('age').value) || 0;
+    const renewable = t.payYears === null;
+
+    $('premiumLabel').textContent = t.payYears === 1 ? '整付保費' : '年繳保費';
+    $('projWrap').classList.toggle('hidden', !renewable);
+    $('note').classList.toggle('hidden', !p.note);
+    $('note').textContent = p.note || '';
+
+    if (t.maxAge !== undefined && age > t.maxAge) {
+      $('warn').classList.remove('hidden');
+      $('warn').textContent = `投保年齡超出「${t.label}」的上限(${t.maxAge} 歲),未能計算。`;
+      $('rows').innerHTML = '';
+      $('total').textContent = '總佣金:—';
+      return;
+    }
+    $('warn').classList.add('hidden');
+
+    const years = renewable ? (parseInt($('projYears').value) || 1) : t.payYears;
+    const rule = t.ageRule;
+    let total = 0, html = '';
+    for (let y = 1; y <= years; y++) {
+      let rate = rateFor(t.rates, y);
+      let adjusted = false;
+      if (y === 1 && rule && age > rule.over) {
+        const steps = Math.min(age, rule.capAge) - rule.over;
+        rate = Math.max(0, round2(rate - rule.minusPerYear * steps));
+        adjusted = true;
+      }
+      const c = premium * rate / 100;
+      total += c;
+      html += `<tr><td>第 ${y} 年</td><td>${fmt(premium)}</td><td>${rate}%${adjusted ? '<br><span class="adj">已按年齡下調</span>' : ''}</td><td>${fmt(c)}</td></tr>`;
+    }
+    $('rows').innerHTML = html;
+    $('total').textContent = '總佣金:' + fmt(total);
+  }
+
+  $('product').addEventListener('change', loadTerms);
+  ['term', 'premium', 'age', 'projYears'].forEach(id => $(id).addEventListener('input', calc));
+  loadTerms();
+  </script>
+  </body>
+  </html>
