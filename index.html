@@ -159,6 +159,22 @@
   const SG_REMARK = "基本計劃（SGHP2）；投保年齡 15 天–70 歲；保費繳付年期與計劃保障期相同（網站按每年繳付計算，沒有設年齡上限）；首年佣金受高投保年齡調整（66–70 歲遞減）；第 7 年起佣金率為 10%；Persistency, Persistency Bonus & Career Benefit 適用；Extra 10% 及公積金不適用；附加契約版本（SGHR2）佣金率不同，網站未加入；首年佣金調整：Group 5: Regular Premium – A&H – Medical；推出日期待補";
   const EB_REMARK = "基本計劃；整付保費；投保年齡 40–75 歲；High Issue Age FYC Reduction：投保年齡 71–75 歲首年佣金為 3%；只有首年佣金；Persistency & Career Benefit、Extra 10%、公積金及附加契約均不適用；Production Credit：100% FYC；首年佣金調整：組別 1 Single Premium";
   const WE_REMARK = "基本計劃；整付保費；投保年齡 15 天–75 歲（年齡上限有 * 號附註，條件待確認）；佣金為整付保費之 4%；High Issue Age FYC Adjustment、Persistency & Career Benefit、Extra 10%、公積金及附加契約均不適用；FYP Credit：整付保費之 15%；首年佣金調整：組別 1 (Single Premium)";
+  const WFS_REMARK = "基本計劃；整付保費；投保年齡 15 日–85 歲；High Issue Age FYC Reduction：投保年齡 69 歲以上每加大一歲減 0.1%，至 74 歲為 3%，其後維持 3% 至 85 歲；Persistency & Career Benefit、Extra 10% 及公積金不適用；FYP Credit：整付保費之 15%；首年佣金調整：組別 1 (Single Premium)";
+  const WF5_REMARK = "基本計劃；保費繳付期 5 年；投保年齡 15 日–80 歲；網站的佣金率為基本佣金與優質業務獎金合計：第 1 年 16.95% + 8.05%、第 2 年 2% + 3%、第 3–5 年 2% + 0%；High Issue Age FYC Reduction：投保年齡 69 歲以上每加大一歲減 1%，74–80 歲維持 20%（網站假設由合計 25% 扣減）；Persistency & Career Benefit 適用；Extra 10% 適用，按合計首年佣金率 25% 計算（已確認）；公積金不適用；FYP Credit：首年保費之 80%；首年佣金調整：組別 3 (Regular Premium – 101 Linked and Traditional Savings)";
+  const PL_REMARK = "基本計劃；保費繳付期 5 年（投保年齡 15 日–75 歲）或 30 年（投保年齡 15 日–55 歲）；網站的佣金率為香港區基本佣金與優質業務獎金合計（與澳門區佣金率相同）：5 年為第 1 年 16.95% + 8.05%、第 2 年 2% + 3%、第 3–5 年 2% + 0%；30 年為第 1 年 54% + 0%、第 2 年 3% + 15%、第 3–6 年 3% + 0%；30 年第 7 年起的佣金文件未列，暫作沒有；高齡投保首年佣金調整不適用；Persistency & Career Benefit 適用；Extra 10% 及公積金待確認（暫作不適用）；英文名稱待補";
+  const GFS_REMARK = "基本計劃；整付保費；投保年齡 15 日–80 歲；High Issue Age FYC Reduction：投保年齡 65 歲以上每加大一歲減 0.1%，至 70 歲為 3%，其後維持 3% 至 80 歲；Persistency & Career Benefit、Extra 10%、公積金及附加契約不適用；FYP Credit：整付保費之 15%；首年佣金調整：組別 1 (Single Premium)";
+  const GF5_REMARK = "基本計劃；保費繳付期 5 年；投保年齡 15 日–75 歲；High Issue Age FYC Reduction：投保年齡 65 歲以上每加大一歲減 1%，70–75 歲維持 20%；Persistency & Career Benefit 適用；Extra 10% 適用；公積金不適用；附加契約的佣金網站未加入；FYP Credit：首年保費之 80%；首年佣金調整：組別 3 (Regular Premium – 101 Linked and Traditional Savings)";
+  const WG_REMARK = "基本計劃；整付保費；投保年齡 15 日–80 歲；佣金為整付保費之 3%；High Issue Age FYC Adjustment：受保人 65 歲以上每加大一歲減 0.1%，至 75 歲為 2%，其後維持 2% 至 80 歲；Persistency & Career Benefit、Extra 10%、公積金及附加契約均不適用；FYP Credit：整付保費之 15%；首年佣金調整：組別 1 (Single Premium)；佣金頁名稱為「財富源源」壽險計劃，產品清單名稱為「財富源源」儲蓄保險計劃 (WG)，是否同一產品待確認";
+  const AD_REMARK = "基本計劃；保費繳付期 5 年；投保年齡 18–70 歲，上限視乎年金款項開始年齡（50 歲開始：18–45 歲；55 歲：18–50 歲；60 歲：18–55 歲；65 歲：18–60 歲；70 歲：18–65 歲；75 歲：18–70 歲），網站只檢查 18–70 歲；年金期為年金款項開始年齡起計 10 年；High Issue Age FYC Reduction 不適用；Persistency & Career Benefit 適用；Extra 10% 適用；公積金不適用（基本計劃）；附加契約的佣金網站未加入；Production Credit：100% FYC；首年佣金調整：組別 3 Regular Premium – 101 Linked and Traditional Savings";
+  const GPS_REMARK = "基本計劃；整付保費；投保年齡 15 日–80 歲；High Issue Age FYC Reduction：投保年齡 65 歲以上每加大一歲減 0.1%，至 70 歲為 3%，其後維持 3% 至 80 歲；Persistency & Career Benefit、Extra 10%、公積金及附加契約不適用；FYP Credit：整付保費之 15%；首年佣金調整：組別 1 (Single Premium)";
+  const GPR_REMARK = "基本計劃；保費繳付期 3 年（限額發售）、5 年或 10 年；投保年齡：3 年及 5 年 15 日–75 歲，10 年 15 日–70 歲；3 年只有首年佣金 11%；10 年第 7 年起的佣金文件未列，暫作沒有；High Issue Age FYC Reduction：投保年齡 65 歲以上每加大一歲，3 年減 0.3%（70–75 歲維持 9.5%）、5 年減 1%（70–75 歲維持 20%）、10 年減 1%（至 70 歲 30%）；Persistency & Career Benefit 適用；Extra 10% 適用；公積金不適用；附加契約的佣金網站未加入；FYP Credit：3 年為首年保費之 40%、5 年 80%、10 年 100%；首年佣金調整：組別 3 (Regular Premium – 101 Linked and Traditional Savings)";
+  const WER_REMARK = "基本計劃；整付保費；投保年齡 15 日–80 歲；佣金為整付保費之 3%；High Issue Age FYC Adjustment：受保人 65 歲以上每加大一歲減 0.1%，至 75 歲為 2%，其後維持 2% 至 80 歲；Persistency & Career Benefit、Extra 10%、公積金及附加契約均不適用；FYP Credit：整付保費之 15%；首年佣金調整：組別 1 (Single Premium)；佣金頁名稱為「財富顯裕」壽險計劃，產品清單名稱為「財富顯裕」儲蓄保險計劃 (WER)，是否同一產品待確認";
+  const FP_REMARK = "基本計劃；整付保費；投保年齡 15 日–70 歲；佣金為整付保費之 3.5%；High Issue Age FYC Adjustment：受保人 65 歲以上每加大一歲減 0.2%（66 歲 3.3% 至 70 歲 2.5%）；Persistency & Career Benefit、Extra 10%、公積金及附加契約均不適用；FYP Credit：整付保費之 15%；首年佣金調整：組別 1 (Single Premium)；佣金頁名稱為「諾享」保障計劃 2，產品清單名稱為「諾享」儲蓄保險計劃2 (FP2)，是否同一產品待確認";
+  const SL_REMARK = "基本計劃；保費繳付期 5 年（投保年齡 15 日–75 歲）、10 年（15 日–70 歲）或 25 年（15 日–55 歲）；5 年只有第 1–5 年佣金；10 年及 25 年文件只列到第 6 年；High Issue Age FYC Reduction 不適用；Persistency & Career Benefit 適用；Extra 10% 適用；公積金由第 7 年開始適用，但比率文件未列，網站未計算；附加契約的佣金網站未加入；FYP Credit：5 年為首年保費之 80%，其他 100%；首年佣金調整：組別 2 Regular Premium – Life；佣金頁名稱為「樂怡人生」保障計劃，產品清單名稱為「樂怡人生」保險計劃；兩個版本（一般及週年紅利）的佣金率假設相同";
+  const SES_REMARK = "基本計劃；整付保費；投保年齡 15 日–80 歲；High Issue Age FYC Adjustment：受保人 65 歲以上每加大一歲減 0.1%，至 75 歲為 2.5%，其後維持 2.5% 至 80 歲；Persistency & Career Benefit、Extra 10%、公積金及附加契約不適用；FYP Credit：整付保費之 15%；首年佣金調整：組別 1 (Single Premium)；佣金頁名稱為「簡愛‧延續」保障計劃 5，產品清單名稱為「簡愛．延續」儲蓄保險計劃5 (SLE5)";
+  const SER_REMARK = "基本計劃；保費繳付期 5 年（投保年齡 15 日–80 歲）或 10 年（15 日–75 歲）；High Issue Age FYC Adjustment：受保人 65 歲以上每加大一歲，5 年減 1%（至 75 歲 15%，其後維持 15% 至 80 歲）、10 年減 1.5%（至 75 歲 20%）；Persistency & Career Benefit 適用；Extra 10% 適用；公積金：5 年不適用，10 年由第 7 年開始適用，但比率文件未列，網站未計算；10 年文件只列到第 6 年佣金；附加契約的佣金網站未加入；FYP Credit：5 年為首年保費之 80%、10 年 100%；首年佣金調整：組別 3 (Regular Premium – 101 Linked and Traditional Savings)；佣金頁名稱為「簡愛‧延續」保障計劃 5，產品清單名稱為「簡愛．延續」儲蓄保險計劃5 (SLE5)";
+  const FL_REMARK = "基本計劃；保費繳付期 6 年（投保年齡 15 日–65 歲）、10 年（15 日–60 歲）、15 年或 20 年（15 日–55 歲）；文件只列到第 6 年佣金；High Issue Age FYC Adjustment：只適用於 6 年繳，受保人 60 歲以上每加大一歲減 1%（61 歲 24% 至 65 歲 20%）；Persistency & Career Benefit 適用；Extra 10% 適用；公積金適用，但比率及年度文件未列，網站未計算；附加契約的佣金網站未加入；FYP Credit：首年保費之 100%；首年佣金調整：組別 3 (Regular Premium – 101 Linked and Traditional Savings)；佣金頁名稱為愛無憂長享計劃 5，產品清單名稱為愛無憂長享儲蓄保險計劃5 (FLCP5)；英文名稱待補";
+  const BP_REMARK = "基本計劃；只適用於香港；保費繳付期 5 年或 12 年（投保年齡 18–65 歲）、18 年（18–60 歲）；5 年只有第 1–5 年佣金；12 年及 18 年文件只列到第 6 年；High Issue Age FYC Reduction 不適用；Persistency & Career Benefit 適用；Extra 10% 適用；公積金：5 年不適用，12 年及 18 年由第 7 年開始適用，但比率文件未列，網站未計算；保費按吸煙狀況、性別、投保年齡及核保評級而定；附加契約的佣金網站未加入；FYP Credit：5 年為首年保費之 80%，12 年及 18 年 100%；首年佣金調整：組別 2 (Regular Premium – Life)；佣金頁的計劃名稱為 BP2 (EP)；同一文件的 BP2（5／10 年繳）網站未加入";
   const DEF_P = [
     "ILP01\tAIA「兩全保」保障型投資相連壽險計劃（定期保費）\tAIA 2-in-1 Protection Linked Plan (Regular Premium)\t投資相連\tN\t0%\t2.7%\t0.3%\t7\tTrailer Fee 按基本戶口價值計算；個人續保佣金花紅及續保率適用；首年佣金調整：組別2－定期保費－人壽\t現有產品\t2023-05\t\tN\t",
     "ILP02\tAIA「兩全保」保障型投資相連壽險計劃（整付保費）\tAIA 2-in-1 Protection Linked Plan (Single Premium)\t投資相連\tN\t0%\t2.7%\t0.15%\t7\tTrailer Fee 按基本戶口價值計算（Production agent）；Direct leader 另有 0.05%；首年佣金調整：組別1－整付保費\t現有產品\t2023-05\t\tN\t",
@@ -200,7 +216,24 @@
     "MD20\t「常伴您」保費退還住院現金保險計劃\tHere For You Refundable Hospital Cash (ROPHC)\t醫療\tY\t10%\t0%\t0%\t\t基本計劃；保單年期及保費繳付期 10 年；投保年齡：主要受保人及配偶計劃一／二／三 18–60 歲、計劃四 18–50 歲，子女（計劃一）5–17 歲，網站照文件數字填 5–60 歲，未換算；配偶可享 85 折優惠；High Issue Age FYC Reduction 不適用；Persistency & Career Benefit 適用；附加契約不適用；首年佣金調整：Group 5: Regular Premium – A&H – Medical\t現有產品\t2015-05\t\tN\t\t2%\t7\t10",
     "MD21\t特級「健康之寶」2\tSGHP2\t醫療\tN\t0%\t0%\t0%\t\t" + SG_REMARK + "\t現有產品\t\t\tY\t",
     "SV01\t優悅年金保險計劃\tEverBliss Annuity Insurance Plan (EBAP)\t終身及儲蓄壽險\tN\t0%\t0%\t0%\t\t" + EB_REMARK + "\t現有產品\t2026-09\t\tN\t",
-    "SV02\t「財富恆裕」人壽保險計劃3\tWealth Elite Life Insurance Plan 3 (WE3)\t終身及儲蓄壽險\tN\t0%\t0%\t0%\t\t" + WE_REMARK + "\t現有產品\t2026-08\t\tN\t"
+    "SV02\t「財富恆裕」人壽保險計劃3\tWealth Elite Life Insurance Plan 3 (WE3)\t終身及儲蓄壽險\tN\t0%\t0%\t0%\t\t" + WE_REMARK + "\t現有產品\t2026-08\t\tN\t",
+    "SV03\t財富盈活儲蓄保險計劃（整付保費）\tWealth Flexi Savings Insurance Plan (WF) – Single Premium\t終身及儲蓄壽險\tN\t0%\t0%\t0%\t\t" + WFS_REMARK + "\t現有產品\t2026-06\t\tN\t",
+    "SV04\t財富盈活儲蓄保險計劃（5 年繳）\tWealth Flexi Savings Insurance Plan (WF) – 5 Pay\t終身及儲蓄壽險\tY\t10%\t0%\t0%\t\t" + WF5_REMARK + "\t現有產品\t2026-06\t\tN\t",
+    "SV05\t「活然人生」保險計劃\t\t終身及儲蓄壽險\tN\t0%\t0%\t0%\t\t" + PL_REMARK + "\t現有產品\t2026-01\t\tN\t",
+    "SV06\t環宇盈活儲蓄保險計劃（整付保費）\tGlobalFlexi Savings Insurance Plan (GF) – Single Premium\t終身及儲蓄壽險\tN\t0%\t0%\t0%\t\t" + GFS_REMARK + "\t現有產品\t2025-07\t\tN\t",
+    "SV07\t環宇盈活儲蓄保險計劃（5 年繳）\tGlobalFlexi Savings Insurance Plan (GF) – 5 Pay\t終身及儲蓄壽險\tY\t10%\t0%\t0%\t\t" + GF5_REMARK + "\t現有產品\t2025-07\t\tN\t",
+    "SV08\t「財富源源」壽險計劃\tWealth Generation (WG)\t終身及儲蓄壽險\tN\t0%\t0%\t0%\t\t" + WG_REMARK + "\t現有產品\t2025-06\t\tN\t",
+    "SV09\t[友扣稅] AIA延期年金計劃2\tAIA Deferred Annuity Plan 2 (ADAP2)\t終身及儲蓄壽險\tY\t10%\t0%\t0%\t\t" + AD_REMARK + "\t現有產品\t2025-02\t\tN\t",
+    "SV10\t盈御多元貨幣儲蓄保險計劃3（整付保費）\tGlobal Power Multi-Currency Plan 3 (GP3) – Single Premium\t終身及儲蓄壽險\tN\t0%\t0%\t0%\t\t" + GPS_REMARK + "\t現有產品\t2024-01\t\tN\t",
+    "SV11\t盈御多元貨幣儲蓄保險計劃3（3／5／10 年繳）\tGlobal Power Multi-Currency Plan 3 (GP3) – 3/5/10 Pay\t終身及儲蓄壽險\tY\t10%\t0%\t0%\t\t" + GPR_REMARK + "\t現有產品\t2024-01\t\tN\t",
+    "SV12\t「財富顯裕」壽險計劃\tWealth Enrich (WER)\t終身及儲蓄壽險\tN\t0%\t0%\t0%\t\t" + WER_REMARK + "\t現有產品\t2022-01\t\tN\t",
+    "SV13\t「諾享」儲蓄保險計劃2\tFortune Promise 2 (FP2)\t終身及儲蓄壽險\tN\t0%\t0%\t0%\t\t" + FP_REMARK + "\t現有產品\t2022-01\t\tN\t",
+    "SV14\t「樂怡人生」保險計劃\tSerene Life\t終身及儲蓄壽險\tY\t10%\t0%\t0%\t\t" + SL_REMARK + "\t現有產品\t2021-08\t\tN\t",
+    "SV15\t「樂怡人生」保險計劃（週年紅利）\tSerene Life (Annual Dividends)\t終身及儲蓄壽險\tY\t10%\t0%\t0%\t\t" + SL_REMARK + "\t現有產品\t2021-08\t\tN\t",
+    "SV16\t「簡愛．延續」儲蓄保險計劃5（整付保費）\tSimply Love Encore 5 (SLE5) – Single Premium\t終身及儲蓄壽險\tN\t0%\t0%\t0%\t\t" + SES_REMARK + "\t現有產品\t2021-07\t\tN\t",
+    "SV17\t「簡愛．延續」儲蓄保險計劃5（5／10 年繳）\tSimply Love Encore 5 (SLE5) – 5/10 Pay\t終身及儲蓄壽險\tY\t10%\t0%\t0%\t\t" + SER_REMARK + "\t現有產品\t2021-07\t\tN\t",
+    "SV18\t愛無憂長享儲蓄保險計劃5\tFLCP5\t終身及儲蓄壽險\tY\t10%\t0%\t0%\t\t" + FL_REMARK + "\t現有產品\t2019-06\t\tN\t",
+    "SV19\t「充裕未來」人壽保險計劃2（特級保障）\tBonus Power Plan 2 – BP2 (EP) (BPEP2)\t終身及儲蓄壽險\tY\t10%\t0%\t0%\t\t" + BP_REMARK + "\t現有產品\t2016-12\t\tN\t"
   ].join("\n");
 
   const UL_TAIL = "\t2.5%\t2.5%\t2.5%\t2.5%\t2.5%\t4.75%";
@@ -209,6 +242,9 @@
   const HJ_TAIL = "\t10%\t6.5%\t6.5%\t6.5%\t6.5%\t10%";
   const VS_TAIL = "\t7.5%\t7.5%\t7.5%\t7.5%\t7.5%\t10%";
   const MT_TAIL = "\t18%\t15%\t15%\t15%\t15%\t15%\t15%\t15%\t15%\t10%";
+  const GP10_TAIL = "\t10%\t3%\t3%\t3%\t3%";
+  const P5_TAIL = "\t5%\t2%\t2%\t2%";
+  const FL6_TAIL = "\t4%\t2%\t2%\t2%\t2%";
   function ulRows(code) {
     return [
       code + "\t靈活供款\t18\t64\t54%" + UL_TAIL,
@@ -232,6 +268,46 @@
     const o = [code + "\t" + t + "\t0\t65\t26%" + VS_TAIL];
     for (let a = 66; a <= 70; a++) o.push(code + "\t" + t + "\t" + a + "\t" + a + "\t" + (91 - a) + "%" + VS_TAIL);
     return o;
+  }
+  function flexRows(code, single, lastFull, maxAge) {
+    const term = single ? "整付" : "5";
+    const tail = single ? "" : P5_TAIL;
+    const rate = k => single ? (35 - k) / 10 : 25 - k;
+    const o = [code + "\t" + term + "\t0\t" + lastFull + "\t" + rate(0) + "%" + tail];
+    for (let k = 1; k <= 4; k++) o.push(code + "\t" + term + "\t" + (lastFull + k) + "\t" + (lastFull + k) + "\t" + rate(k) + "%" + tail);
+    o.push(code + "\t" + term + "\t" + (lastFull + 5) + "\t" + maxAge + "\t" + rate(5) + "%" + tail);
+    return o;
+  }
+  function declRows(code, term, y1, step, lastFull, lastStep, maxAge, tail) {
+    const rate = a => Math.round((y1 - step * (a - lastFull)) * 100) / 100;
+    const o = [code + "\t" + term + "\t0\t" + lastFull + "\t" + y1 + "%" + tail];
+    for (let a = lastFull + 1; a < lastStep; a++) o.push(code + "\t" + term + "\t" + a + "\t" + a + "\t" + rate(a) + "%" + tail);
+    o.push(code + "\t" + term + "\t" + lastStep + "\t" + maxAge + "\t" + rate(lastStep) + "%" + tail);
+    return o;
+  }
+  function wgRows(code) {
+    const o = [code + "\t整付\t0\t65\t3%"];
+    for (let a = 66; a <= 74; a++) o.push(code + "\t整付\t" + a + "\t" + a + "\t" + (30 - (a - 65)) / 10 + "%");
+    o.push(code + "\t整付\t75\t80\t2%");
+    return o;
+  }
+  function gp3Rows(code) {
+    const o = [code + "\t3\t0\t65\t11%"];
+    for (let k = 1; k <= 4; k++) o.push(code + "\t3\t" + (65 + k) + "\t" + (65 + k) + "\t" + (110 - 3 * k) / 10 + "%");
+    o.push(code + "\t3\t70\t75\t9.5%");
+    return o;
+  }
+  function gp10Rows(code) {
+    const o = [code + "\t10\t0\t65\t35%" + GP10_TAIL];
+    for (let a = 66; a <= 70; a++) o.push(code + "\t10\t" + a + "\t" + a + "\t" + (35 - (a - 65)) + "%" + GP10_TAIL);
+    return o;
+  }
+  function slRows(code) {
+    return [
+      code + "\t5\t0\t75\t15%\t3%\t3%\t3%\t3%",
+      code + "\t10\t0\t70\t29%\t5%\t3%\t3%\t3%\t3%",
+      code + "\t25\t0\t55\t54%\t15%\t3%\t3%\t3%\t3%"
+    ];
   }
   function rep(v, k) {
     let s = "";
@@ -285,9 +361,31 @@
     ["MD18\t至85歲\t40\t60\t26%" + MT_TAIL, "MD19\t至85歲\t40\t60\t26%" + MT_TAIL],
     ["MD20\t10\t5\t60\t15%\t2%\t2%\t2%\t2%\t2%"],
     sgRows("MD21"),
-    ["SV01\t整付\t40\t70\t3.2%", "SV01\t整付\t71\t75\t3%", "SV02\t整付\t0\t75\t4%"]
+    ["SV01\t整付\t40\t70\t3.2%", "SV01\t整付\t71\t75\t3%", "SV02\t整付\t0\t75\t4%"],
+    flexRows("SV03", true, 69, 85), flexRows("SV04", false, 69, 80),
+    ["SV05\t5\t0\t75\t25%\t5%\t2%\t2%\t2%", "SV05\t30\t0\t55\t54%\t18%\t3%\t3%\t3%\t3%"],
+    flexRows("SV06", true, 65, 80), flexRows("SV07", false, 65, 75),
+    wgRows("SV08"),
+    ["SV09\t5\t18\t70\t15%\t1%\t1%\t1%\t1%"],
+    flexRows("SV10", true, 65, 80),
+    gp3Rows("SV11"), flexRows("SV11", false, 65, 75), gp10Rows("SV11"),
+    wgRows("SV12"),
+    declRows("SV13", "整付", 3.5, 0.2, 65, 70, 70, ""),
+    slRows("SV14"), slRows("SV15"),
+    declRows("SV16", "整付", 3.5, 0.1, 65, 75, 80, ""),
+    declRows("SV17", "5", 25, 1, 65, 75, 80, P5_TAIL),
+    declRows("SV17", "10", 35, 1.5, 65, 75, 75, GP10_TAIL),
+    declRows("SV18", "6", 25, 1, 60, 65, 65, FL6_TAIL),
+    [
+      "SV18\t10\t0\t60\t30%\t4%\t2%\t2%\t2%\t2%",
+      "SV18\t15\t0\t55\t40%\t8%\t3%\t3%\t3%\t3%",
+      "SV18\t20\t0\t55\t50%\t10%\t3%\t3%\t3%\t3%",
+      "SV19\t5\t18\t65\t25%" + P5_TAIL,
+      "SV19\t12\t18\t65\t40%" + GP10_TAIL,
+      "SV19\t18\t18\t60\t45%\t13%\t3%\t3%\t3%\t3%"
+    ]
   ).join("\n");
-  const KEY_P = "comm_products_v14", KEY_R = "comm_rates_v14";
+  const KEY_P = "comm_products_v18", KEY_R = "comm_rates_v18";
 
   const $ = id => document.getElementById(id);
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -395,8 +493,8 @@
       : '<div class="msg ok">沒有發現問題：共 ' + products.length + " 個產品（現有 " + (products.length - offCount) + "、停售 " + offCount + "），" + rates.length + " 行佣金率。</div>";
   }
 
-  function ageRange(code) {
-    const rs = rates.filter(r => r.code === code);
+  function ageRange(code, term) {
+    const rs = rates.filter(r => r.code === code && (term == null || r.term === term));
     if (rs.length === 0) return "—";
     return Math.min.apply(null, rs.map(r => r.min)) + "–" + Math.max.apply(null, rs.map(r => r.max));
   }
@@ -462,7 +560,7 @@
     if (p.ongoing) tags += '<span class="tag blue">續保佣金持續派發</span>';
     if (p.renewLimit > 0) tags += '<span class="tag purple">' + (isPayTo(term) ? "保費繳付至 " + p.renewLimit + " 歲" : "續保至 " + p.renewLimit + " 歲生日前一個保障週年日") + "</span>";
     $("info").innerHTML = '<div class="info' + (p.off ? " off" : "") + '"><div class="zh">' + esc(p.zh) + '</div><div class="en">' + esc(p.en) + "</div>" +
-      tags + '<div class="dates">推出日期：' + esc(p.launch || "—") + "　｜　停售日期：" + esc(p.stop || "—") + "　｜　投保年齡：" + ageRange(p.code) + " 歲</div>" +
+      tags + '<div class="dates">推出日期：' + esc(p.launch || "—") + "　｜　停售日期：" + esc(p.stop || "—") + "　｜　投保年齡：" + ageRange(p.code, term) + " 歲</div>" +
       (p.remark ? '<div class="remark">備註：' + esc(p.remark) + "</div>" : "") + "</div>";
   }
 
