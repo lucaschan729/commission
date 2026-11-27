@@ -131,12 +131,12 @@
     </div>
     <div class="card">
       <h2>產品主檔</h2>
-      <div class="hint">欄位次序：產品代碼、中文名稱、英文名稱、產品類別、指定產品 (Y/N)、額外佣金率、額外整付保費佣金率、Trailer Fee 年率、Trailer 起始年度、備註、產品狀況（現有產品／停售）、推出日期、停售日期、末年佣金率持續適用 (Y/N)、續保年齡上限（沒有則留空）、公積金率、公積金起始年度、公積金結束年度（沒有公積金則三欄留空）、超額保費佣金率（只限萬用壽險，其他留空）。可直接從 Excel 複製貼上。</div>
+      <div class="hint">欄位次序：產品代碼、中文名稱、英文名稱、產品類別、指定產品 (Y/N)、額外佣金率、額外整付保費佣金率、Trailer Fee 年率、Trailer 起始年度、備註、產品狀況（現有產品／停售）、推出日期、停售日期、末年佣金率持續適用 (Y/N)、續保年齡上限（保費繳付至某歲的產品填該歲數；沒有則留空）、公積金率、公積金起始年度、公積金結束年度（沒有公積金則三欄留空）、超額保費佣金率（只限萬用壽險，其他留空）。可直接從 Excel 複製貼上。</div>
       <textarea id="pText"></textarea>
     </div>
     <div class="card">
       <h2>佣金率表</h2>
-      <div class="hint">欄位次序：產品代碼、繳付年期（數字或「整付」「每年續保」等文字）、年齡下限、年齡上限、第1年、第2年……（年度數目不限）。其後的生效日期和備註會自動忽略。</div>
+      <div class="hint">欄位次序：產品代碼、繳付年期（數字或「整付」「每年續保」「至85歲」「與保障期相同」等文字）、年齡下限、年齡上限、第1年、第2年……（年度數目不限）。其後的生效日期和備註會自動忽略。</div>
       <textarea id="rText"></textarea>
       <button id="save">更新資料</button>
       <button id="reset" class="light">還原預設資料</button>
@@ -151,6 +151,14 @@
   const OP_REMARK = "基本計劃；每年續保；投保年齡 15 日–70 歲；高投保年齡調整：受保人 66–70 歲，首年至第十年佣金扣減 5 個百分點；個人續保佣金花紅適用；Extra 10% 及公積金不適用（基本計劃版本）；首年佣金調整：Group 5: Regular Premium – A&H – Medical";
   const FG_REMARK = "基本計劃；只有首年佣金 10%，其後年度不適用；受保媽媽須為「極臻•至尊」／「極臻•至尊明珠」指定計劃選項（年繳保費）的受保人，年滿 18–45 歲，懷孕期第 22 週或以上；高投保年齡調整、個人續保佣金花紅、Extra 10%、公積金、首年保費入賬及首年佣金調整均不適用；繳付方式待確認";
   const PU_REMARK = "基本計劃；投保年齡 15 日–80 歲；佣金率按投保年齡分四段（0–65、66–70、71–75、76–80）；「AIA 健康系列」按未扣除優惠的毛保費計算佣金；Persistency, Persistency Bonus & Career Benefit 適用；Extra 10% 及公積金不適用（基本計劃）";
+  const CG_REMARK = "基本計劃；每年續保；投保年齡 15 日–70 歲；高投保年齡首年佣金調整：65 歲以上每歲遞減 2%（66 歲 44% 至 70 歲 36%）；「AIA 健康系列」按未扣除優惠的毛保費計算佣金；個人續保佣金花紅適用；Extra 10% 適用（基本計劃）；公積金不適用（基本計劃）；1 Case Count；首年佣金調整：Regular Premium – A&H – Medical Group 5";
+  const HJ_REMARK = "基本計劃；每年續保；投保年齡 15 日–80 歲；首年佣金受高投保年齡調整（66–80 歲遞減）；第 7 年起佣金率為 10%；「AIA 健康系列」按未扣除優惠的毛保費計算佣金；Persistency, Persistency Bonus & Career Benefit 適用；Extra 10% 及公積金不適用（基本計劃）";
+  const VS_REMARK = "基本計劃；投保年齡 15 日–80 歲；首年佣金受高投保年齡調整（66–80 歲遞減）；第 7 年起佣金率為 10%；「AIA 健康系列」按未扣除優惠的毛保費計算佣金；Persistency, Persistency Bonus & Career Benefit 適用；Extra 10% 及公積金不適用（基本計劃）；附加契約版本佣金率不同，網站未加入；首年佣金調整：Regular Premium – A&H – Medical Group 5；繳付年期待確認（暫填每年續保）";
+  const CE_REMARK = "基本計劃；投保年齡 15 日–70 歲；高投保年齡調整：受保人 66–70 歲，首年至第十年佣金扣減 5 個百分點；Persistency, Persistency Bonus & Career Benefit 適用；Extra 10% 及公積金不適用（基本計劃版本）；首年佣金調整：Group 5: Regular Premium – A&H – Medical；繳付年期待確認（暫填每年續保）";
+  const MT_REMARK = "基本計劃（危疾）；投保年齡 40–60 歲；保費繳付至受保人 85 歲（網站假設繳付年數 = 85 − 投保年齡）；High Issue Age FYC Adjustment 不適用；Persistency 適用；Extra 10% 及公積金不適用（基本計劃）；附加契約版本未加入；首年佣金調整：Group 5: Regular Premium – A&H – Medical";
+  const SG_REMARK = "基本計劃（SGHP2）；投保年齡 15 天–70 歲；保費繳付年期與計劃保障期相同（網站按每年繳付計算，沒有設年齡上限）；首年佣金受高投保年齡調整（66–70 歲遞減）；第 7 年起佣金率為 10%；Persistency, Persistency Bonus & Career Benefit 適用；Extra 10% 及公積金不適用；附加契約版本（SGHR2）佣金率不同，網站未加入；首年佣金調整：Group 5: Regular Premium – A&H – Medical；推出日期待補";
+  const EB_REMARK = "基本計劃；整付保費；投保年齡 40–75 歲；High Issue Age FYC Reduction：投保年齡 71–75 歲首年佣金為 3%；只有首年佣金；Persistency & Career Benefit、Extra 10%、公積金及附加契約均不適用；Production Credit：100% FYC；首年佣金調整：組別 1 Single Premium";
+  const WE_REMARK = "基本計劃；整付保費；投保年齡 15 天–75 歲（年齡上限有 * 號附註，條件待確認）；佣金為整付保費之 4%；High Issue Age FYC Adjustment、Persistency & Career Benefit、Extra 10%、公積金及附加契約均不適用；FYP Credit：整付保費之 15%；首年佣金調整：組別 1 (Single Premium)";
   const DEF_P = [
     "ILP01\tAIA「兩全保」保障型投資相連壽險計劃（定期保費）\tAIA 2-in-1 Protection Linked Plan (Regular Premium)\t投資相連\tN\t0%\t2.7%\t0.3%\t7\tTrailer Fee 按基本戶口價值計算；個人續保佣金花紅及續保率適用；首年佣金調整：組別2－定期保費－人壽\t現有產品\t2023-05\t\tN\t",
     "ILP02\tAIA「兩全保」保障型投資相連壽險計劃（整付保費）\tAIA 2-in-1 Protection Linked Plan (Single Premium)\t投資相連\tN\t0%\t2.7%\t0.15%\t7\tTrailer Fee 按基本戶口價值計算（Production agent）；Direct leader 另有 0.05%；首年佣金調整：組別1－整付保費\t現有產品\t2023-05\t\tN\t",
@@ -179,12 +187,28 @@
     "MD07\t極臻•至尊明珠醫療計劃 — 首護摯寶\tOPCEOPFG\t醫療\tN\t0%\t0%\t0%\t\t" + FG_REMARK + "\t現有產品\t2024-11\t\tN\t",
     "MD08\t[友扣稅] AIA自願醫保尊耀計劃\tAIA Voluntary Health Insurance Privilege Ultra Scheme (AVPU)\t醫療\tN\t0%\t0%\t0%\t\t" + PU_REMARK + "；繳付年期待確認（暫填每年續保）\t現有產品\t2024-04\t\tY\t",
     "MD09\t「大灣醫薈通」門診計劃\tGBAOP\t醫療\tN\t0%\t0%\t0%\t\t基本計劃；每年續保；投保年齡 15 日–75 歲；「AIA 健康系列」按未扣除優惠的毛保費計算佣金；高投保年齡首年佣金調整、個人續保佣金花紅、Extra 10% 及公積金均不適用（基本計劃）；首年佣金調整：Group 10 Regular Premium – A&H – Outpatient\t現有產品\t2024-04\t\tY\t",
-    "MD10\t「尊耀明珠」醫療計劃\tPrivilege Ultra Pearl Medical Plan (PUP)\t醫療\tN\t0%\t0%\t0%\t\t" + PU_REMARK + "；每年續保；首年佣金調整：Regular Premium – A&H – Medical Group 5\t現有產品\t2024-04\t\tY\t"
+    "MD10\t「尊耀明珠」醫療計劃\tPrivilege Ultra Pearl Medical Plan (PUP)\t醫療\tN\t0%\t0%\t0%\t\t" + PU_REMARK + "；每年續保；首年佣金調整：Regular Premium – A&H – Medical Group 5\t現有產品\t2024-04\t\tY\t",
+    "MD11\t癌症全方位保障3\tCancer Guardian 3 (CG3)\t醫療\tY\t10%\t0%\t0%\t\t" + CG_REMARK + "\t現有產品\t2022-10\t\tY\t",
+    "MD12\t癌症全方位明珠保障3\tCancer Guardian Pearl 3 (CGP3)\t醫療\tY\t10%\t0%\t0%\t\t" + CG_REMARK + "\t現有產品\t2022-10\t\tY\t",
+    "MD13\t「全程守護健康保」\tHJG\t醫療\tN\t0%\t0%\t0%\t\t" + HJ_REMARK + "\t現有產品\t2022-01\t\tY\t",
+    "MD14\t[友扣稅] AIA自願醫保靈活計劃\tAVF\t醫療\tN\t0%\t0%\t0%\t\t" + VS_REMARK + "\t現有產品\t2019-04\t\tY\t",
+    "MD15\t[友扣稅] AIA自願醫保標準計劃\tAVS\t醫療\tN\t0%\t0%\t0%\t\t" + VS_REMARK + "\t現有產品\t2019-04\t\tY\t",
+    "MD16\t至尊醫療計劃5\tCEO5\t醫療\tN\t0%\t0%\t0%\t\t" + CE_REMARK + "\t現有產品\t2017-10\t\tY\t",
+    "MD17\t至尊明珠醫療計劃5\tCEOP5\t醫療\tN\t0%\t0%\t0%\t\t" + CE_REMARK + "\t現有產品\t2017-10\t\tY\t",
+    "MD18\t「都市三保」醫療危疾保障計劃\tMT\t醫療\tN\t0%\t0%\t0%\t\t" + MT_REMARK + "\t現有產品\t2017-09\t\tY\t85",
+    "MD19\t「都市三保明珠」醫療危疾保障計劃\tMTP\t醫療\tN\t0%\t0%\t0%\t\t" + MT_REMARK + "\t現有產品\t2017-09\t\tY\t85",
+    "MD20\t「常伴您」保費退還住院現金保險計劃\tHere For You Refundable Hospital Cash (ROPHC)\t醫療\tY\t10%\t0%\t0%\t\t基本計劃；保單年期及保費繳付期 10 年；投保年齡：主要受保人及配偶計劃一／二／三 18–60 歲、計劃四 18–50 歲，子女（計劃一）5–17 歲，網站照文件數字填 5–60 歲，未換算；配偶可享 85 折優惠；High Issue Age FYC Reduction 不適用；Persistency & Career Benefit 適用；附加契約不適用；首年佣金調整：Group 5: Regular Premium – A&H – Medical\t現有產品\t2015-05\t\tN\t\t2%\t7\t10",
+    "MD21\t特級「健康之寶」2\tSGHP2\t醫療\tN\t0%\t0%\t0%\t\t" + SG_REMARK + "\t現有產品\t\t\tY\t",
+    "SV01\t優悅年金保險計劃\tEverBliss Annuity Insurance Plan (EBAP)\t終身及儲蓄壽險\tN\t0%\t0%\t0%\t\t" + EB_REMARK + "\t現有產品\t2026-09\t\tN\t",
+    "SV02\t「財富恆裕」人壽保險計劃3\tWealth Elite Life Insurance Plan 3 (WE3)\t終身及儲蓄壽險\tN\t0%\t0%\t0%\t\t" + WE_REMARK + "\t現有產品\t2026-08\t\tN\t"
   ].join("\n");
 
   const UL_TAIL = "\t2.5%\t2.5%\t2.5%\t2.5%\t2.5%\t4.75%";
   const FS_TAIL = "\t17%\t5%\t5%\t5%\t5%\t5%\t5%\t5%\t5%\t1.5%\t1.5%\t1.5%\t1.5%\t1.5%\t3%";
   const SW_TAIL = "\t17%\t7.5%\t5%\t5%\t5%\t5%\t5%\t5%\t5%\t1.5%\t1.5%\t1.5%\t1.5%\t1.5%\t3%";
+  const HJ_TAIL = "\t10%\t6.5%\t6.5%\t6.5%\t6.5%\t10%";
+  const VS_TAIL = "\t7.5%\t7.5%\t7.5%\t7.5%\t7.5%\t10%";
+  const MT_TAIL = "\t18%\t15%\t15%\t15%\t15%\t15%\t15%\t15%\t15%\t10%";
   function ulRows(code) {
     return [
       code + "\t靈活供款\t18\t64\t54%" + UL_TAIL,
@@ -192,15 +216,21 @@
       code + "\t靈活供款\t70\t75\t41%" + UL_TAIL
     ];
   }
-  function fsRows(code) {
+  function fsRows(code, maxAge) {
     const o = [code + "\t每年續保\t0\t65\t46%" + FS_TAIL];
-    for (let a = 66; a <= 75; a++) o.push(code + "\t每年續保\t" + a + "\t" + a + "\t" + (46 - 2 * (a - 65)) + "%" + FS_TAIL);
+    for (let a = 66; a <= maxAge; a++) o.push(code + "\t每年續保\t" + a + "\t" + a + "\t" + (46 - 2 * (a - 65)) + "%" + FS_TAIL);
     return o;
   }
-  function swRows(code) {
-    const o = [code + "\t每年續保\t0\t65\t30%" + SW_TAIL];
-    for (let a = 66; a <= 77; a++) o.push(code + "\t每年續保\t" + a + "\t" + a + "\t" + (95 - a) + "%" + SW_TAIL);
-    o.push(code + "\t每年續保\t78\t80\t17%" + SW_TAIL);
+  function stepRows(code, y1, tail) {
+    const o = [code + "\t每年續保\t0\t65\t" + y1 + "%" + tail];
+    for (let a = 66; a <= 77; a++) o.push(code + "\t每年續保\t" + a + "\t" + a + "\t" + (y1 - (a - 65)) + "%" + tail);
+    o.push(code + "\t每年續保\t78\t80\t" + (y1 - 13) + "%" + tail);
+    return o;
+  }
+  function sgRows(code) {
+    const t = "與保障期相同";
+    const o = [code + "\t" + t + "\t0\t65\t26%" + VS_TAIL];
+    for (let a = 66; a <= 70; a++) o.push(code + "\t" + t + "\t" + a + "\t" + a + "\t" + (91 - a) + "%" + VS_TAIL);
     return o;
   }
   function rep(v, k) {
@@ -245,12 +275,19 @@
     "PA10\t12\t0\t63\t46%\t18%\t5%\t5%\t5%\t5%"
   ].concat(
     ulRows("UL01"), ulRows("UL02"), ulRows("UL03"), ulRows("UL04"),
-    fsRows("MD01"), swRows("MD02"), swRows("MD03"),
+    fsRows("MD01", 75), stepRows("MD02", 30, SW_TAIL), stepRows("MD03", 30, SW_TAIL),
     opRows("MD04"), ["MD05\t一次性繳付\t18\t45\t10%"],
     opRows("MD06"), ["MD07\t一次性繳付\t18\t45\t10%"],
-    puRows("MD08"), ["MD09\t每年續保\t0\t75\t15%\t10%"], puRows("MD10")
+    puRows("MD08"), ["MD09\t每年續保\t0\t75\t15%\t10%"], puRows("MD10"),
+    fsRows("MD11", 70), fsRows("MD12", 70),
+    stepRows("MD13", 26, HJ_TAIL), stepRows("MD14", 26, VS_TAIL), stepRows("MD15", 26, VS_TAIL),
+    opRows("MD16"), opRows("MD17"),
+    ["MD18\t至85歲\t40\t60\t26%" + MT_TAIL, "MD19\t至85歲\t40\t60\t26%" + MT_TAIL],
+    ["MD20\t10\t5\t60\t15%\t2%\t2%\t2%\t2%\t2%"],
+    sgRows("MD21"),
+    ["SV01\t整付\t40\t70\t3.2%", "SV01\t整付\t71\t75\t3%", "SV02\t整付\t0\t75\t4%"]
   ).join("\n");
-  const KEY_P = "comm_products_v11", KEY_R = "comm_rates_v11";
+  const KEY_P = "comm_products_v14", KEY_R = "comm_rates_v14";
 
   const $ = id => document.getElementById(id);
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -258,6 +295,7 @@
   const money = n => n.toLocaleString("zh-HK", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const pct = n => parseFloat(n.toFixed(4)) + "%";
   const isNum = s => /^\d+(\.\d+)?$/.test(s);
+  const isPayTo = t => /^至/.test(t || "");
   const termLabel = t => isNum(t) ? t + " 年" : t;
   const cleanDate = s => (!s || /^[-–—]+$/.test(s)) ? "" : s;
   const rangeLabel = r => r.min === r.max ? String(r.min) : r.min + "–" + r.max;
@@ -368,7 +406,7 @@
   }
 
   function renderList() {
-    let h = '<table><thead><tr><th>代碼</th><th class="l">中文名稱</th><th class="l">英文名稱</th><th>類別</th><th class="c">產品狀況</th><th class="c">推出日期</th><th class="c">停售日期</th><th class="c">繳付年期</th><th class="c">投保年齡</th><th class="c">續保年齡上限</th><th>額外10%</th><th>超額保費</th><th>額外整付</th><th>Trailer Fee</th><th>公積金</th><th class="c">末年佣金率持續</th></tr></thead><tbody>';
+    let h = '<table><thead><tr><th>代碼</th><th class="l">中文名稱</th><th class="l">英文名稱</th><th>類別</th><th class="c">產品狀況</th><th class="c">推出日期</th><th class="c">停售日期</th><th class="c">繳付年期</th><th class="c">投保年齡</th><th class="c">續保／繳費年齡上限</th><th>額外10%</th><th>超額保費</th><th>額外整付</th><th>Trailer Fee</th><th>公積金</th><th class="c">末年佣金率持續</th></tr></thead><tbody>';
     products.forEach(p => {
       h += "<tr" + (p.off ? ' class="offrow"' : "") + "><td>" + esc(p.code) + '</td><td class="l">' + esc(p.zh) + '</td><td class="l">' + esc(p.en) +
         "</td><td>" + esc(p.cat) + '</td><td class="c">' + statusTag(p) + '</td><td class="c">' + esc(p.launch || "—") + '</td><td class="c">' + esc(p.stop || "—") +
@@ -422,7 +460,7 @@
     if (p.trailer > 0) tags += '<span class="tag blue">Trailer Fee ' + pct(p.trailer) + "／年</span>";
     if (pfValid(p)) tags += '<span class="tag teal">公積金 ' + pct(p.pf) + "（" + pfYears(p) + "）</span>";
     if (p.ongoing) tags += '<span class="tag blue">續保佣金持續派發</span>';
-    if (p.renewLimit > 0) tags += '<span class="tag purple">續保至 ' + p.renewLimit + " 歲生日前一個保障週年日</span>";
+    if (p.renewLimit > 0) tags += '<span class="tag purple">' + (isPayTo(term) ? "保費繳付至 " + p.renewLimit + " 歲" : "續保至 " + p.renewLimit + " 歲生日前一個保障週年日") + "</span>";
     $("info").innerHTML = '<div class="info' + (p.off ? " off" : "") + '"><div class="zh">' + esc(p.zh) + '</div><div class="en">' + esc(p.en) + "</div>" +
       tags + '<div class="dates">推出日期：' + esc(p.launch || "—") + "　｜　停售日期：" + esc(p.stop || "—") + "　｜　投保年齡：" + ageRange(p.code) + " 歲</div>" +
       (p.remark ? '<div class="remark">備註：' + esc(p.remark) + "</div>" : "") + "</div>";
@@ -446,6 +484,7 @@
     if (r.years.length === 0) { $("result").innerHTML = html + '<div class="msg err">這一行資料沒有佣金率，請到「佣金資料管理」檢查。</div>'; return; }
     const termNum = isNum(term) ? Number(term) : 0;
     const hasExcess = p.excess > 0;
+    const payTo = isPayTo(term);
     let n = r.years.length;
     if (p.ongoing) n = Math.min(50, Math.max(1, Math.round(num($("nYears").value)) || r.years.length));
     let maxN = 0, capped = false;
@@ -478,7 +517,7 @@
     const totalLabel = (p.ongoing ? "首 " + n + " 年佣金總額" : "佣金總額") + (excluded.length ? "（不含 " + excluded.join("及") + "）" : "");
 
     if (m.length > 1) html += '<div class="msg warn">有 ' + m.length + " 行資料同時符合，現用第一行計算，請檢查年齡段是否重疊。</div>";
-    if (capped) html += '<div class="msg warn">此產品只可續保至 ' + p.renewLimit + " 歲生日前一個保障週年日，" + age + " 歲投保最多繳付 " + maxN + " 年保費，計算年數已調整為 " + maxN + " 年。</div>";
+    if (capped) html += '<div class="msg warn">' + (payTo ? "此產品的保費繳付至 " + p.renewLimit + " 歲，" : "此產品只可續保至 " + p.renewLimit + " 歲生日前一個保障週年日，") + age + " 歲投保最多繳付 " + maxN + " 年保費，計算年數已調整為 " + maxN + " 年。</div>";
     html += '<div class="stats">' +
       '<div class="stat"><div class="k">首年佣金</div><div class="v">' + money(first) + "</div></div>" +
       (n > 1 ? '<div class="stat"><div class="k">續保佣金合計</div><div class="v">' + money(renew) + "</div></div>" : "") +
@@ -493,7 +532,7 @@
       (n > 1 ? "續保佣金假設每年保費不變，而且保單持續生效。" : "") +
       (hasExcess ? "超額保費佣金假設每年超額保費相同；保額層增加後的佣金未計算。" : "") +
       (p.ongoing ? "第 " + r.years.length + " 年的佣金率（" + pct(r.years[r.years.length - 1]) + "）適用於其後所有年度。" : "") +
-      (p.renewLimit > 0 ? "續保年齡上限 " + p.renewLimit + " 歲，" + age + " 歲投保最多繳付 " + maxN + " 年保費。" : "") + "</div>";
+      (p.renewLimit > 0 ? (payTo ? "保費繳付至 " : "續保年齡上限 ") + p.renewLimit + " 歲，" + age + " 歲投保最多繳付 " + maxN + " 年保費。" : "") + "</div>";
 
     if (pfValid(p)) {
       const pfLast = termNum ? Math.min(p.pfEnd, termNum) : p.pfEnd;
