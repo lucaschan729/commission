@@ -1,4 +1,4 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
@@ -148,6 +148,9 @@
 <script>
   const UL_REMARK = "基本計劃；佣金 = 目標保費 × 目標保費佣金率 + 超額保費 × 超額保費佣金率；目標保費可於建議書找到；保額層增加後按新保額層生效年期計算（網站未處理）；額外 10% 及繳付年期待確認";
   const SW_REMARK = "基本計劃；首年佣金受高投保年齡調整（66–80 歲遞減）；「AIA 健康系列」按未扣除優惠的毛保費計算佣金；Persistency, Persistency Bonus & Career Benefit 適用；公積金不適用（基本計劃）";
+  const OP_REMARK = "基本計劃；每年續保；投保年齡 15 日–70 歲；高投保年齡調整：受保人 66–70 歲，首年至第十年佣金扣減 5 個百分點；個人續保佣金花紅適用；Extra 10% 及公積金不適用（基本計劃版本）；首年佣金調整：Group 5: Regular Premium – A&H – Medical";
+  const FG_REMARK = "基本計劃；只有首年佣金 10%，其後年度不適用；受保媽媽須為「極臻•至尊」／「極臻•至尊明珠」指定計劃選項（年繳保費）的受保人，年滿 18–45 歲，懷孕期第 22 週或以上；高投保年齡調整、個人續保佣金花紅、Extra 10%、公積金、首年保費入賬及首年佣金調整均不適用；繳付方式待確認";
+  const PU_REMARK = "基本計劃；投保年齡 15 日–80 歲；佣金率按投保年齡分四段（0–65、66–70、71–75、76–80）；「AIA 健康系列」按未扣除優惠的毛保費計算佣金；Persistency, Persistency Bonus & Career Benefit 適用；Extra 10% 及公積金不適用（基本計劃）";
   const DEF_P = [
     "ILP01\tAIA「兩全保」保障型投資相連壽險計劃（定期保費）\tAIA 2-in-1 Protection Linked Plan (Regular Premium)\t投資相連\tN\t0%\t2.7%\t0.3%\t7\tTrailer Fee 按基本戶口價值計算；個人續保佣金花紅及續保率適用；首年佣金調整：組別2－定期保費－人壽\t現有產品\t2023-05\t\tN\t",
     "ILP02\tAIA「兩全保」保障型投資相連壽險計劃（整付保費）\tAIA 2-in-1 Protection Linked Plan (Single Premium)\t投資相連\tN\t0%\t2.7%\t0.15%\t7\tTrailer Fee 按基本戶口價值計算（Production agent）；Direct leader 另有 0.05%；首年佣金調整：組別1－整付保費\t現有產品\t2023-05\t\tN\t",
@@ -163,13 +166,20 @@
     "PA08\t意安心升級意外保險計劃\tSecure First Plus Accident Insurance Plan\t個人意外\tY\t10%\t0%\t0%\t\t基本計劃；保費繳付期 12 年；投保年齡 0–63；Persistency & Career Benefit 適用；首年佣金調整：組別(9)－Secure First Plus\t現有產品\t2017-05\t\tN\t\t5%\t7\t12",
     "PA09\t「常伴您」保費退還意外升級保險計劃\tHere For You Refundable Accident Plus Insurance Plan\t個人意外\tY\t10%\t0%\t0%\t\t基本計劃；保費繳付期 8 年；文件的投保年齡為下次生日年齡（主要受保人及配偶 18–56 歲，子女 15 日–17 歲），網站已換算為實際年齡 0–55 歲；Persistency & Career Benefit 適用；附加契約不適用；首年佣金調整：Group 5: Regular Premium – A&H – Medical\t現有產品\t2016-04\t\tN\t\t2%\t7\t8",
     "PA10\t意安心意外保險計劃\tSecure First Accident Insurance Plan\t個人意外\tY\t10%\t0%\t0%\t\t基本計劃；保費繳付期 12 年；投保年齡 0–63；Persistency 及 Career Benefit 適用；首年佣金調整：組別(9)－Secure First\t現有產品\t2013-05\t\tN\t\t5%\t7\t12",
-    "UL01\t「財富相傳」人壽保險計劃5\tWealth Preserver 5 (WP5)\t萬用壽險\tN\t0%\t0%\t0%\t\t" + UL_REMARK + "\t現有產品\t2016-07\t\tY\t\t\t\t\t2.5%",
-    "UL02\t「財富雋永」人壽保險計劃2\tWealth Ultima 2 (WU2)\t萬用壽險\tN\t0%\t0%\t0%\t\t" + UL_REMARK + "\t現有產品\t2016-07\t\tY\t\t\t\t\t2.5%",
-    "UL03\t「財富雋永」壽險計劃\tWealth Ultima (WU)\t萬用壽險\tN\t0%\t0%\t0%\t\t" + UL_REMARK + "；佣金率按 WP5／WU2 文件所述相同\t停售\t2014-08\t2016-07\tY\t\t\t\t\t2.5%",
-    "UL04\t「財富相傳3」壽險計劃\tWealth Preserver 3 (WP3)\t萬用壽險\tN\t0%\t0%\t0%\t\t" + UL_REMARK + "；佣金率按 WP5／WU2 文件所述相同\t停售\t2012-06\t2016-07\tY\t\t\t\t\t2.5%",
-    "MD01\t「啟護您」–癌症藥物保障\tFS\t醫療\tY\t10%\t0%\t0%\t\t基本計劃；高投保年齡首年佣金調整：65 歲以上每歲遞減 2%（最高投保年齡待確認）；「AIA 健康系列」按未扣除優惠的毛保費計算佣金；個人續保佣金花紅適用；公積金不適用；首年佣金調整：Group 5: Regular Premium – A&H – Medical\t現有產品\t2026-10\t\tY\t",
+    "UL01\t「財富相傳」人壽保險計劃5\tWealth Preserver 5 (WP5)\t萬用壽險\tN\t0%\t0%\t0%\t\t" + UL_REMARK + "；投保年齡 18–75 歲\t現有產品\t2016-07\t\tY\t\t\t\t\t2.5%",
+    "UL02\t「財富雋永」人壽保險計劃2\tWealth Ultima 2 (WU2)\t萬用壽險\tN\t0%\t0%\t0%\t\t" + UL_REMARK + "；投保年齡 18–75 歲\t現有產品\t2016-07\t\tY\t\t\t\t\t2.5%",
+    "UL03\t「財富雋永」壽險計劃\tWealth Ultima (WU)\t萬用壽險\tN\t0%\t0%\t0%\t\t" + UL_REMARK + "；佣金率按 WP5／WU2 文件所述相同；投保年齡待確認\t停售\t2014-08\t2016-07\tY\t\t\t\t\t2.5%",
+    "UL04\t「財富相傳3」壽險計劃\tWealth Preserver 3 (WP3)\t萬用壽險\tN\t0%\t0%\t0%\t\t" + UL_REMARK + "；佣金率按 WP5／WU2 文件所述相同；投保年齡待確認\t停售\t2012-06\t2016-07\tY\t\t\t\t\t2.5%",
+    "MD01\t「啟護您」–癌症藥物保障\tFS\t醫療\tY\t10%\t0%\t0%\t\t基本計劃；保費繳付期：每年續保；投保年齡 15 日–75 歲；高投保年齡首年佣金調整：65 歲以上每歲遞減 2%（66 歲 44% 至 75 歲 26%）；「AIA 健康系列」按未扣除優惠的毛保費計算佣金；個人續保佣金花紅適用；公積金不適用；首年佣金調整：Group 5: Regular Premium – A&H – Medical\t現有產品\t2026-10\t\tY\t",
     "MD02\t[友扣稅] AIA自願醫保睿選計劃\tAIA Voluntary Health Insurance SelectWise Scheme (AVSW)\t醫療\tN\t0%\t0%\t0%\t\t" + SW_REMARK + "\t現有產品\t2025-10\t\tY\t",
-    "MD03\t「睿選明珠」醫療計劃\tSelectWise Pearl Medical Plan (SWP)\t醫療\tN\t0%\t0%\t0%\t\t" + SW_REMARK + "\t現有產品\t2025-10\t\tY\t"
+    "MD03\t「睿選明珠」醫療計劃\tSelectWise Pearl Medical Plan (SWP)\t醫療\tN\t0%\t0%\t0%\t\t" + SW_REMARK + "\t現有產品\t2025-10\t\tY\t",
+    "MD04\t極臻•至尊醫療計劃\tOptimaCEO Medical Plan (OPCEO)\t醫療\tN\t0%\t0%\t0%\t\t" + OP_REMARK + "；牙科惠益只接受投保至 65 歲\t現有產品\t2024-11\t\tY\t",
+    "MD05\t極臻•至尊醫療計劃 — 首護摯寶\tOPCEOFG\t醫療\tN\t0%\t0%\t0%\t\t" + FG_REMARK + "\t現有產品\t2024-11\t\tN\t",
+    "MD06\t極臻•至尊明珠醫療計劃\tOptimaCEO Pearl Medical Plan (OPCEOP)\t醫療\tN\t0%\t0%\t0%\t\t" + OP_REMARK + "\t現有產品\t2024-11\t\tY\t",
+    "MD07\t極臻•至尊明珠醫療計劃 — 首護摯寶\tOPCEOPFG\t醫療\tN\t0%\t0%\t0%\t\t" + FG_REMARK + "\t現有產品\t2024-11\t\tN\t",
+    "MD08\t[友扣稅] AIA自願醫保尊耀計劃\tAIA Voluntary Health Insurance Privilege Ultra Scheme (AVPU)\t醫療\tN\t0%\t0%\t0%\t\t" + PU_REMARK + "；繳付年期待確認（暫填每年續保）\t現有產品\t2024-04\t\tY\t",
+    "MD09\t「大灣醫薈通」門診計劃\tGBAOP\t醫療\tN\t0%\t0%\t0%\t\t基本計劃；每年續保；投保年齡 15 日–75 歲；「AIA 健康系列」按未扣除優惠的毛保費計算佣金；高投保年齡首年佣金調整、個人續保佣金花紅、Extra 10% 及公積金均不適用（基本計劃）；首年佣金調整：Group 10 Regular Premium – A&H – Outpatient\t現有產品\t2024-04\t\tY\t",
+    "MD10\t「尊耀明珠」醫療計劃\tPrivilege Ultra Pearl Medical Plan (PUP)\t醫療\tN\t0%\t0%\t0%\t\t" + PU_REMARK + "；每年續保；首年佣金調整：Regular Premium – A&H – Medical Group 5\t現有產品\t2024-04\t\tY\t"
   ].join("\n");
 
   const UL_TAIL = "\t2.5%\t2.5%\t2.5%\t2.5%\t2.5%\t4.75%";
@@ -184,7 +194,7 @@
   }
   function fsRows(code) {
     const o = [code + "\t每年續保\t0\t65\t46%" + FS_TAIL];
-    for (let a = 66; a <= 80; a++) o.push(code + "\t每年續保\t" + a + "\t" + a + "\t" + (46 - 2 * (a - 65)) + "%" + FS_TAIL);
+    for (let a = 66; a <= 75; a++) o.push(code + "\t每年續保\t" + a + "\t" + a + "\t" + (46 - 2 * (a - 65)) + "%" + FS_TAIL);
     return o;
   }
   function swRows(code) {
@@ -192,6 +202,26 @@
     for (let a = 66; a <= 77; a++) o.push(code + "\t每年續保\t" + a + "\t" + a + "\t" + (95 - a) + "%" + SW_TAIL);
     o.push(code + "\t每年續保\t78\t80\t17%" + SW_TAIL);
     return o;
+  }
+  function rep(v, k) {
+    let s = "";
+    for (let i = 0; i < k; i++) s += "\t" + v + "%";
+    return s;
+  }
+  function tiered(code, min, max, y1, y2, y36, y710, y11) {
+    return code + "\t每年續保\t" + min + "\t" + max + "\t" + y1 + "%\t" + y2 + "%" + rep(y36, 4) + rep(y710, 4) + "\t" + y11 + "%";
+  }
+  function opRows(code) {
+    return [
+      tiered(code, 0, 65, 25, 20, 15, 15, 10),
+      tiered(code, 66, 70, 20, 15, 10, 10, 10)
+    ];
+  }
+  function puRows(code) {
+    return opRows(code).concat([
+      tiered(code, 71, 75, 16, 8, 8, 8, 8),
+      tiered(code, 76, 80, 13, 8, 5, 5, 5)
+    ]);
   }
   const DEF_R = [
     "ILP01\t定期\t0\t99\t12%\t2.4%\t2.4%\t2.4%\t2.4%\t2.4%",
@@ -213,8 +243,14 @@
     "PA08\t12\t0\t63\t46%\t18%\t5%\t5%\t5%\t5%",
     "PA09\t8\t0\t55\t10%\t2%\t2%\t2%\t2%\t2%",
     "PA10\t12\t0\t63\t46%\t18%\t5%\t5%\t5%\t5%"
-  ].concat(ulRows("UL01"), ulRows("UL02"), ulRows("UL03"), ulRows("UL04"), fsRows("MD01"), swRows("MD02"), swRows("MD03")).join("\n");
-  const KEY_P = "comm_products_v9", KEY_R = "comm_rates_v9";
+  ].concat(
+    ulRows("UL01"), ulRows("UL02"), ulRows("UL03"), ulRows("UL04"),
+    fsRows("MD01"), swRows("MD02"), swRows("MD03"),
+    opRows("MD04"), ["MD05\t一次性繳付\t18\t45\t10%"],
+    opRows("MD06"), ["MD07\t一次性繳付\t18\t45\t10%"],
+    puRows("MD08"), ["MD09\t每年續保\t0\t75\t15%\t10%"], puRows("MD10")
+  ).join("\n");
+  const KEY_P = "comm_products_v11", KEY_R = "comm_rates_v11";
 
   const $ = id => document.getElementById(id);
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
