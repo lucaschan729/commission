@@ -457,7 +457,7 @@
       return j;
     }
     async function loadFx() {
-      const urls = [store.get(KEY_FXURL, "").trim(), "rates.json"].filter(Boolean);
+      const urls = [store.get(KEY_FXURL, "").trim(), "https://lucaschan729.github.io/fx/rates.json"].filter(Boolean);
       let j = null;
       for (const u of urls) { try { j = await fetchRates(u); break; } catch (e) {} }
       const d = j || BUILTIN;
