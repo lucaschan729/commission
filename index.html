@@ -4,189 +4,220 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>佣金計算器</title>
+  <script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/t2cn.js" async onload="window.onOpenCC&&window.onOpenCC()"></script>
   <style>
-    :root {
-      --brand: #c2163c; --brand-deep: #7a0f26; --brand-soft: #fdf1f3; --gold: #c8963e;
-      --bg: #f5f3ef; --card: #ffffff; --ink: #1f1a1c; --muted: #6f676a; --line: #e9e4de; --soft: #faf8f5;
-      --radius: 18px;
-      --shadow: 0 1px 2px rgba(31,26,28,.04), 0 14px 34px -14px rgba(31,26,28,.16);
-    }
+    :root { --brand:#c2163c; --brand-deep:#7a0f26; --brand-soft:#fdf1f3; --gold:#c8963e; --teal:#13786c; --bg:#f5f3ef; --card:#fff; --ink:#1f1a1c; --muted:#6f676a; --line:#e9e4de; --soft:#faf8f5; --radius:18px; --shadow:0 1px 2px rgba(31,26,28,.04),0 14px 34px -14px rgba(31,26,28,.16); }
     * { box-sizing: border-box; }
-    body { font-family: "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", "Segoe UI", sans-serif; margin: 0; background: var(--bg); color: var(--ink); line-height: 1.55; -webkit-font-smoothing: antialiased; font-variant-numeric: tabular-nums; }
+    body { font-family: "PingFang TC","Microsoft JhengHei","Noto Sans TC","Segoe UI",sans-serif; margin:0; background:var(--bg); color:var(--ink); line-height:1.55; -webkit-font-smoothing:antialiased; font-variant-numeric:tabular-nums; }
+    button { font-family: inherit; cursor: pointer; }
+    header { position:relative; overflow:hidden; color:#fff; padding:28px 24px 104px; background: radial-gradient(900px 380px at 88% -10%,rgba(255,255,255,.16),transparent 60%), radial-gradient(620px 320px at 0% 120%,rgba(200,150,62,.38),transparent 60%), linear-gradient(135deg,#5c0b1d 0%,#a3122f 55%,#c2163c 100%); }
+    header::after { content:""; position:absolute; right:-90px; top:-130px; width:420px; height:420px; border-radius:50%; border:1px solid rgba(255,255,255,.16); box-shadow:0 0 0 60px rgba(255,255,255,.04),0 0 0 130px rgba(255,255,255,.03); pointer-events:none; }
+    header .inner { max-width:1180px; margin:0 auto; position:relative; z-index:1; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+    .eyebrow { display:inline-flex; align-items:center; gap:8px; font-size:11px; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:rgba(255,255,255,.78); }
+    .eyebrow::before { content:""; width:26px; height:2px; background:var(--gold); border-radius:2px; }
+    .lang { display:inline-flex; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.28); border-radius:999px; padding:3px; }
+    .lang button { border:0; background:transparent; color:rgba(255,255,255,.85); font-size:13px; font-weight:700; padding:5px 13px; border-radius:999px; }
+    .lang button.active { background:#fff; color:var(--brand-deep); }
+    header h1 { margin:14px 0 0; font-size:34px; font-weight:800; letter-spacing:.04em; line-height:1.2; }
+    header p { margin:10px 0 0; max-width:640px; color:rgba(255,255,255,.82); font-size:14px; }
+    main { position:relative; z-index:2; max-width:1180px; margin:-68px auto 32px; padding:0 20px; }
+    .tabs { display:inline-flex; background:rgba(255,255,255,.96); border-radius:999px; padding:5px; box-shadow:var(--shadow); margin-bottom:20px; }
+    .tab { padding:10px 24px; border-radius:999px; cursor:pointer; color:var(--muted); font-size:14px; font-weight:700; user-select:none; }
+    .tab.active { background:linear-gradient(135deg,var(--brand),var(--brand-deep)); color:#fff; box-shadow:0 6px 14px -6px rgba(194,22,60,.7); }
+    .layout, .stack { display:grid; gap:20px; }
+    .card { background:var(--card); border-radius:var(--radius); padding:24px; box-shadow:var(--shadow); border:1px solid rgba(233,228,222,.7); min-width:0; }
+    .side-right { min-width:0; }
+    h2 { margin:0 0 18px; font-size:15px; font-weight:800; letter-spacing:.08em; display:flex; align-items:center; gap:10px; }
+    h2::before { content:""; width:5px; height:18px; background:linear-gradient(180deg,var(--brand),var(--gold)); border-radius:3px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; margin-top:16px; }
+    .full { grid-column:1 / -1; }
+    label { display:block; font-size:12px; font-weight:700; letter-spacing:.04em; color:var(--muted); margin-bottom:6px; }
+    .stepno { display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%; background:var(--brand); color:#fff; font-size:11px; margin-right:6px; }
+    select, input { width:100%; padding:11px 13px; border:1px solid var(--line); border-radius:12px; font-size:15px; font-family:inherit; background:var(--soft); color:var(--ink); }
+    select { -webkit-appearance:none; appearance:none; padding-right:36px; text-overflow:ellipsis; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%236f676a' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 13px center; }
+    select:disabled { opacity:.6; }
+    select:focus, input:focus, textarea:focus { outline:none; border-color:var(--brand); background-color:#fff; box-shadow:0 0 0 4px rgba(194,22,60,.12); }
+    textarea { width:100%; height:190px; padding:12px; border:1px solid var(--line); border-radius:12px; background:var(--soft); color:var(--ink); font-family:Consolas,"SF Mono",Menlo,monospace; font-size:12px; line-height:1.6; white-space:pre; overflow:auto; margin-top:10px; }
+    .btn { background:linear-gradient(135deg,var(--brand),var(--brand-deep)); color:#fff; border:0; padding:11px 22px; border-radius:12px; font-size:14px; font-weight:700; margin:14px 8px 0 0; box-shadow:0 8px 18px -8px rgba(194,22,60,.7); }
+    .btn.light { background:#fff; color:var(--ink); border:1px solid var(--line); box-shadow:none; }
+    .btn.small { padding:7px 14px; font-size:13px; margin:0; white-space:nowrap; }
 
-    header { position: relative; overflow: hidden; color: #fff; padding: 40px 24px 104px;
-      background:
-        radial-gradient(900px 380px at 88% -10%, rgba(255,255,255,.16), transparent 60%),
-        radial-gradient(620px 320px at 0% 120%, rgba(200,150,62,.38), transparent 60%),
-        linear-gradient(135deg, #5c0b1d 0%, #a3122f 55%, #c2163c 100%); }
-    header::after { content: ""; position: absolute; right: -90px; top: -130px; width: 420px; height: 420px; border-radius: 50%;
-      border: 1px solid rgba(255,255,255,.16); box-shadow: 0 0 0 60px rgba(255,255,255,.04), 0 0 0 130px rgba(255,255,255,.03); pointer-events: none; }
-    header .inner { max-width: 1180px; margin: 0 auto; position: relative; z-index: 1; }
-    .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: rgba(255,255,255,.78); }
-    .eyebrow::before { content: ""; width: 26px; height: 2px; background: var(--gold); border-radius: 2px; }
-    header h1 { margin: 10px 0 0; font-size: 34px; font-weight: 800; letter-spacing: .04em; line-height: 1.2; }
-    header p { margin: 10px 0 0; max-width: 620px; color: rgba(255,255,255,.82); font-size: 14px; }
-    .ver { display: inline-block; margin-left: 10px; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: .06em; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.28); vertical-align: middle; }
+    .seg { display:flex; background:#f1ede8; border-radius:12px; padding:4px; gap:4px; }
+    .seg button { flex:1; border:0; background:transparent; padding:8px 6px; border-radius:9px; font-size:13px; font-weight:700; color:var(--muted); }
+    .seg button.active { background:#fff; color:var(--brand-deep); box-shadow:0 2px 6px rgba(31,26,28,.1); }
+    .chips { display:flex; flex-wrap:wrap; gap:6px; margin:10px 0; }
+    .chip { border:1px solid var(--line); background:#fff; color:var(--muted); border-radius:999px; padding:5px 12px; font-size:12px; font-weight:700; }
+    .chip.active { background:var(--brand); border-color:var(--brand); color:#fff; }
+    .plist { margin-top:10px; max-height:320px; overflow:auto; border:1px solid var(--line); border-radius:14px; background:#fff; }
+    .pitem { padding:10px 14px; border-bottom:1px solid var(--line); cursor:pointer; border-left:4px solid transparent; }
+    .pitem:last-child { border-bottom:0; }
+    .pitem:hover { background:var(--soft); }
+    .pitem.sel { background:var(--brand-soft); border-left-color:var(--brand); }
+    .pn { font-weight:700; font-size:14px; line-height:1.35; }
+    .pe { font-size:12px; color:var(--muted); }
+    .pm { font-size:11px; color:#9a9396; margin-top:2px; }
+    .dot { width:8px; height:8px; border-radius:50%; background:#1f9d55; display:inline-block; margin-right:5px; }
+    .dot.off { background:#9a9396; }
+    .pempty { padding:18px; text-align:center; color:var(--muted); font-size:13px; }
+    .psel { border:1px solid #f0c9d2; background:var(--brand-soft); border-radius:14px; padding:12px 14px; display:flex; gap:12px; align-items:center; justify-content:space-between; }
+    .psel .pn { font-size:15px; }
+    details.fx { border:1px dashed var(--line); border-radius:12px; padding:10px 14px; font-size:13px; }
+    details.fx summary { cursor:pointer; font-weight:700; color:var(--brand); }
+    .fxgrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:8px; margin-top:6px; }
+    .fxgrid input { padding:7px 10px; font-size:13px; }
+    .fxgrid label { margin-bottom:3px; font-size:11px; }
 
-    main { position: relative; z-index: 2; max-width: 1180px; margin: -68px auto 32px; padding: 0 20px; }
-    .tabs { display: inline-flex; background: rgba(255,255,255,.96); border-radius: 999px; padding: 5px; box-shadow: var(--shadow); margin-bottom: 20px; }
-    .tab { padding: 10px 24px; border-radius: 999px; cursor: pointer; color: var(--muted); font-size: 14px; font-weight: 700; letter-spacing: .03em; transition: all .2s; user-select: none; }
-    .tab:hover { color: var(--brand); }
-    .tab.active { background: linear-gradient(135deg, var(--brand), var(--brand-deep)); color: #fff; box-shadow: 0 6px 14px -6px rgba(194,22,60,.7); }
+    .info { background:var(--card); border-radius:var(--radius); padding:22px 24px; box-shadow:var(--shadow); border:1px solid rgba(233,228,222,.7); border-top:4px solid var(--brand); margin-bottom:20px; }
+    .info.off { border-top-color:#9a9396; }
+    .info .zh { font-weight:800; font-size:20px; line-height:1.35; }
+    .info .en { color:var(--muted); font-size:13px; margin:2px 0 6px; }
+    .info .dates { font-size:13px; color:var(--muted); margin-top:14px; padding-top:12px; border-top:1px dashed var(--line); }
+    .info .remark { font-size:13px; color:var(--muted); margin-top:12px; }
+    .info .remark summary { cursor:pointer; font-weight:700; color:var(--brand); padding:4px 0; }
+    .info .remark ul { margin:8px 0 0; padding-left:20px; }
+    .info .remark li { margin:4px 0; break-inside:avoid; }
+    .info .remark li::marker { color:var(--gold); }
+    .tag { display:inline-block; border-radius:999px; padding:3px 11px; font-size:12px; font-weight:700; margin:6px 6px 0 0; background:#f1ede8; color:#4a4346; border:1px solid transparent; }
+    .tag.gold { background:#fbf1dc; color:#8a5a0b; border-color:#f0dcae; }
+    .tag.blue { background:#e9f1fd; color:#1d4f9c; border-color:#cfe0fa; }
+    .tag.green { background:#e7f6ec; color:#1a6b3a; border-color:#c9ead5; }
+    .tag.purple { background:#f1ecfc; color:#5a32a8; border-color:#dfd3f7; }
+    .tag.teal { background:#e3f6f3; color:#136259; border-color:#c2ebe4; }
+    .tag.on { background:#1f9d55; color:#fff; }
+    .tag.off { background:#7b7477; color:#fff; }
+    td .tag { margin:0; }
 
-    .layout { display: grid; gap: 20px; }
-    .stack { display: grid; gap: 20px; }
-    .card { background: var(--card); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); border: 1px solid rgba(233,228,222,.7); min-width: 0; }
-    .side-right { min-width: 0; }
-    .side-right .card { margin-top: 0; }
-    h2 { margin: 0 0 18px; font-size: 15px; font-weight: 800; letter-spacing: .08em; display: flex; align-items: center; gap: 10px; color: var(--ink); }
-    h2::before { content: ""; width: 5px; height: 18px; background: linear-gradient(180deg, var(--brand), var(--gold)); border-radius: 3px; }
+    .guide { border:1px dashed #e3c9a0; background:linear-gradient(180deg,#fffdf8,#fff); border-radius:16px; padding:22px 24px; }
+    .guide .gt { font-size:18px; font-weight:800; }
+    .guide .gi { font-size:13px; color:var(--muted); margin-top:4px; }
+    .guide ol { list-style:none; margin:16px 0 12px; padding:0; display:grid; gap:10px; }
+    .guide li { display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:12px; background:var(--soft); border:1px solid var(--line); font-size:14px; color:var(--muted); }
+    .guide .gn { flex:0 0 26px; width:26px; height:26px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; background:#ddd5cc; color:#fff; font-weight:800; font-size:13px; }
+    .guide li.now { background:var(--brand-soft); border-color:#f0c9d2; color:var(--ink); font-weight:700; }
+    .guide li.now .gn { background:var(--brand); }
+    .guide li.done { color:#1a6b3a; background:#f0f9f3; border-color:#cfead8; }
+    .guide li.done .gn { background:#1f9d55; }
 
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; }
-    .full { grid-column: 1 / -1; }
-    .row { display: flex; gap: 14px; flex-wrap: wrap; }
-    .catbox { flex: 1 1 140px; min-width: 0; }
-    .prodbox { flex: 2 1 240px; min-width: 0; }
-    label { display: block; font-size: 12px; font-weight: 700; letter-spacing: .04em; color: var(--muted); margin-bottom: 6px; }
-    label.check { display: inline-flex; align-items: center; gap: 8px; margin: 12px 0 0; cursor: pointer; font-weight: 600; font-size: 13px; letter-spacing: 0; }
-    label.check input { width: 16px; height: 16px; margin: 0; padding: 0; accent-color: var(--brand); }
-    select, input { width: 100%; padding: 11px 13px; border: 1px solid var(--line); border-radius: 12px; font-size: 15px; font-family: inherit; background: var(--soft); color: var(--ink); transition: border .2s, box-shadow .2s, background .2s; }
-    select { -webkit-appearance: none; appearance: none; padding-right: 36px; text-overflow: ellipsis;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%236f676a' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-      background-repeat: no-repeat; background-position: right 13px center; }
-    select:hover, input:hover { border-color: #d8d0c7; }
-    select:focus, input:focus, textarea:focus { outline: none; border-color: var(--brand); background-color: #fff; box-shadow: 0 0 0 4px rgba(194,22,60,.12); }
-    textarea { width: 100%; height: 190px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--soft); color: var(--ink); font-family: Consolas, "SF Mono", Menlo, monospace; font-size: 12px; line-height: 1.6; white-space: pre; overflow: auto; margin-top: 10px; }
-    button { background: linear-gradient(135deg, var(--brand), var(--brand-deep)); color: #fff; border: 0; padding: 11px 22px; border-radius: 12px; font-size: 14px; font-weight: 700; font-family: inherit; letter-spacing: .04em; cursor: pointer; margin: 14px 8px 0 0; box-shadow: 0 8px 18px -8px rgba(194,22,60,.7); transition: transform .15s, box-shadow .15s, background .2s; }
-    button:hover { transform: translateY(-1px); box-shadow: 0 12px 22px -8px rgba(194,22,60,.75); }
-    button:active { transform: translateY(0); }
-    button.light { background: #fff; color: var(--ink); border: 1px solid var(--line); box-shadow: none; }
-    button.light:hover { background: var(--soft); box-shadow: none; }
+    .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin:14px 0; }
+    .stat { background:var(--soft); border:1px solid var(--line); border-radius:14px; padding:14px 16px; }
+    .stat .k { font-size:12px; color:var(--muted); font-weight:700; }
+    .stat .v { font-size:21px; font-weight:800; margin-top:4px; }
+    .stat .x { font-size:13px; font-weight:700; color:var(--teal); margin-top:2px; }
+    .stat.main { grid-column:1 / -1; order:-1; position:relative; overflow:hidden; border:0; color:#fff; padding:22px 24px; background:radial-gradient(420px 200px at 100% 0%,rgba(200,150,62,.45),transparent 65%),linear-gradient(135deg,#6a0d22,#c2163c); box-shadow:0 16px 30px -16px rgba(194,22,60,.75); }
+    .stat.main .k { color:rgba(255,255,255,.85); font-size:13px; }
+    .stat.main .v { font-size:38px; line-height:1.15; margin-top:6px; }
+    .stat.main .x { color:#f6dfa8; font-size:18px; margin-top:4px; }
+    .fxbox { background:#eefaf7; border:1px solid #c2ebe4; border-left:4px solid #1a9484; border-radius:12px; padding:10px 14px; font-size:13px; color:#136259; margin-bottom:16px; }
+    .fxbox .w { color:#86560a; font-weight:700; }
 
-    .info { background: var(--card); border-radius: var(--radius); padding: 22px 24px; box-shadow: var(--shadow); border: 1px solid rgba(233,228,222,.7); border-top: 4px solid var(--brand); margin-bottom: 20px; }
-    .info.off { border-top-color: #9a9396; }
-    .info .zh { font-weight: 800; font-size: 20px; line-height: 1.35; letter-spacing: .02em; }
-    .info .en { color: var(--muted); font-size: 13px; margin-top: 2px; margin-bottom: 6px; }
-    .info .dates { font-size: 13px; color: var(--muted); margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--line); }
-    .info .remark { font-size: 13px; color: var(--muted); margin-top: 12px; }
-    .info .remark summary { cursor: pointer; font-weight: 700; color: var(--brand); letter-spacing: .03em; padding: 4px 0; }
-    .info .remark summary:hover { color: var(--brand-deep); }
-    .info .remark ul { margin: 8px 0 0; padding-left: 20px; }
-    .info .remark li { margin: 4px 0; break-inside: avoid; }
-    .info .remark li::marker { color: var(--gold); }
+    .scroll { overflow-x:auto; border-radius:14px; border:1px solid var(--line); box-shadow:0 6px 18px -12px rgba(31,26,28,.25); }
+    table { width:100%; border-collapse:collapse; font-size:14px; background:#fff; }
+    th, td { padding:11px 14px; text-align:right; white-space:nowrap; }
+    thead th { background:linear-gradient(135deg,#7a0f26,#b3153a); color:#fff; font-size:12px; font-weight:700; letter-spacing:.05em; border-bottom:3px solid var(--gold); }
+    td { border-bottom:1px solid #f0ebe5; }
+    td:first-child, th:first-child, td.l, th.l { text-align:left; }
+    td.c, th.c { text-align:center; }
+    tbody tr:nth-child(even) td { background:#fbf8f4; }
+    tbody tr:hover td { background:#fdf3e3; }
+    #result tbody tr.fy td { background:var(--brand-soft); font-weight:700; }
+    #result tbody td:first-child { box-shadow:inset 4px 0 0 #ead9c2; font-weight:600; }
+    #result tbody tr.fy td:first-child { box-shadow:inset 4px 0 0 var(--brand); }
+    .pill { display:inline-block; min-width:54px; text-align:center; padding:2px 10px; border-radius:999px; background:#fbf1dc; color:#8a5a0b; font-weight:700; font-size:13px; }
+    tr.fy .pill { background:var(--brand); color:#fff; }
+    td.sum { font-weight:800; color:var(--brand-deep); }
+    td.cv { font-weight:700; color:var(--teal); }
+    tfoot td { font-weight:800; background:#2b1a1f; color:#fff; border:0; }
+    tfoot td.sum { color:#f6dfa8; }
+    tfoot td.cv { color:#9fe3d8; }
+    tr.offrow td { color:#a8a1a4; }
+    #list { max-height:580px; overflow:auto; }
+    #list table { font-size:13px; }
+    #list th { position:sticky; top:0; z-index:1; }
+    #list td:first-child { font-weight:700; color:var(--brand-deep); }
 
-    .tag { display: inline-block; border-radius: 999px; padding: 3px 11px; font-size: 12px; font-weight: 700; margin: 6px 6px 0 0; background: #f1ede8; color: #4a4346; border: 1px solid transparent; }
-    .tag.gold { background: #fbf1dc; color: #8a5a0b; border-color: #f0dcae; }
-    .tag.blue { background: #e9f1fd; color: #1d4f9c; border-color: #cfe0fa; }
-    .tag.green { background: #e7f6ec; color: #1a6b3a; border-color: #c9ead5; }
-    .tag.purple { background: #f1ecfc; color: #5a32a8; border-color: #dfd3f7; }
-    .tag.teal { background: #e3f6f3; color: #136259; border-color: #c2ebe4; }
-    .tag.on { background: #1f9d55; color: #fff; }
-    .tag.off { background: #7b7477; color: #fff; }
-    td .tag { margin: 0; }
-
-    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 14px 0 18px; }
-    .stat { background: var(--soft); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; }
-    .stat .k { font-size: 12px; color: var(--muted); font-weight: 700; letter-spacing: .04em; }
-    .stat .v { font-size: 22px; font-weight: 800; margin-top: 4px; letter-spacing: .01em; }
-    .stat.main { grid-column: 1 / -1; order: -1; position: relative; overflow: hidden; border: 0; color: #fff; padding: 22px 24px;
-      background: radial-gradient(420px 200px at 100% 0%, rgba(200,150,62,.45), transparent 65%), linear-gradient(135deg, #6a0d22, #c2163c); box-shadow: 0 16px 30px -16px rgba(194,22,60,.75); }
-    .stat.main::after { content: ""; position: absolute; right: -50px; bottom: -70px; width: 190px; height: 190px; border-radius: 50%; border: 1px solid rgba(255,255,255,.2); box-shadow: 0 0 0 34px rgba(255,255,255,.05); }
-    .stat.main .k { color: rgba(255,255,255,.85); font-size: 13px; }
-    .stat.main .v { font-size: 40px; line-height: 1.15; margin-top: 6px; }
-
-    .scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; }
-    table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th, td { padding: 11px 14px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
-    th { background: var(--soft); color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: .04em; }
-    td:first-child, th:first-child { text-align: left; }
-    td.l, th.l { text-align: left; }
-    td.c, th.c { text-align: center; }
-    tbody tr:last-child td { border-bottom: 0; }
-    tbody tr:hover td { background: #fcfaf7; }
-    #result tbody tr:first-child td { background: var(--brand-soft); font-weight: 700; }
-    tr.offrow td { color: #a8a1a4; }
-    tfoot td { font-weight: 800; background: var(--soft); border-top: 2px solid var(--line); border-bottom: 0; }
-    #list { max-height: 580px; overflow: auto; }
-    #list table { font-size: 13px; }
-    #list th { position: sticky; top: 0; z-index: 1; box-shadow: 0 1px 0 var(--line); }
-    #list td:first-child { font-weight: 700; color: var(--brand-deep); }
-
-    .trailer, .pfbox { border-radius: 14px; padding: 14px 16px 14px 18px; margin-top: 16px; font-size: 14px; border: 1px solid; border-left-width: 4px; }
-    .trailer { background: #f1f6fe; border-color: #cfe0fa; border-left-color: #2f6fd0; }
-    .trailer b { color: #1d4f9c; }
-    .pfbox { background: #eefaf7; border-color: #c2ebe4; border-left-color: #1a9484; }
-    .pfbox b { color: #136259; }
-
-    .msg { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 12px; margin-top: 10px; font-size: 14px; border: 1px solid; }
-    .msg::before { flex: 0 0 20px; width: 20px; height: 20px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: #fff; margin-top: 1px; }
-    .err { background: #fdecec; color: #8f1d1d; border-color: #f7caca; }
-    .err::before { content: "!"; background: #d33b3b; }
-    .warn { background: #fdf5e1; color: #86560a; border-color: #f3dfae; }
-    .warn::before { content: "!"; background: #d9952a; }
-    .ok { background: #e8f7ee; color: #1a6b3a; border-color: #c6e9d3; }
-    .ok::before { content: "✓"; background: #1f9d55; }
-    .hint { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.6; }
-    #result > .hint { margin-top: 12px; padding: 10px 14px; background: var(--soft); border-radius: 10px; }
-    footer { max-width: 1180px; margin: 0 auto; padding: 0 20px 36px; font-size: 12px; color: var(--muted); text-align: center; }
-    .hidden { display: none !important; }
-
-    @media (min-width: 980px) {
-      .layout { grid-template-columns: 380px minmax(0, 1fr); align-items: start; }
-      .info .remark ul { columns: 2; column-gap: 32px; }
-    }
-    @media (min-width: 980px) and (min-height: 780px) {
-      .side-left { position: sticky; top: 16px; }
-    }
-    @media (max-width: 640px) {
-      header { padding: 30px 18px 96px; }
-      header h1 { font-size: 27px; }
-      main { padding: 0 14px; }
-      .card, .info { padding: 18px; }
-      .tab { padding: 9px 16px; }
-      .stat.main .v { font-size: 31px; }
-      .info .zh { font-size: 18px; }
-    }
+    .trailer, .pfbox { border-radius:14px; padding:14px 16px 14px 18px; margin-top:16px; font-size:14px; border:1px solid; border-left-width:4px; }
+    .trailer { background:#f1f6fe; border-color:#cfe0fa; border-left-color:#2f6fd0; }
+    .trailer b { color:#1d4f9c; }
+    .pfbox { background:#eefaf7; border-color:#c2ebe4; border-left-color:#1a9484; }
+    .pfbox b { color:#136259; }
+    .msg { display:flex; gap:10px; align-items:flex-start; padding:12px 14px; border-radius:12px; margin-top:10px; font-size:14px; border:1px solid; }
+    .msg::before { flex:0 0 20px; width:20px; height:20px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:#fff; margin-top:1px; }
+    .err { background:#fdecec; color:#8f1d1d; border-color:#f7caca; }
+    .err::before { content:"!"; background:#d33b3b; }
+    .warn { background:#fdf5e1; color:#86560a; border-color:#f3dfae; }
+    .warn::before { content:"!"; background:#d9952a; }
+    .ok { background:#e8f7ee; color:#1a6b3a; border-color:#c6e9d3; }
+    .ok::before { content:"✓"; background:#1f9d55; }
+    .hint { font-size:12px; color:var(--muted); margin-top:6px; line-height:1.6; }
+    #result > .hint { margin-top:12px; padding:10px 14px; background:var(--soft); border-radius:10px; }
+    footer { max-width:1180px; margin:0 auto; padding:0 20px 36px; font-size:12px; color:var(--muted); text-align:center; }
+    .hidden { display:none !important; }
+    @media (min-width:980px) { .layout { grid-template-columns:400px minmax(0,1fr); align-items:start; } .info .remark ul { columns:2; column-gap:32px; } }
+    @media (max-width:640px) { header { padding:22px 18px 96px; } header h1 { font-size:27px; } main { padding:0 14px; } .card, .info { padding:18px; } .tab { padding:9px 16px; } .stat.main .v { font-size:30px; } }
   </style>
   </head>
   <body>
   <header>
     <div class="inner">
-      <div class="eyebrow">Commission Calculator</div>
-      <h1>佣金計算器<span class="ver">v30</span></h1>
-      <p>按產品、繳付年期及投保年齡計算首年、續保佣金、超額保費佣金、額外整付保費佣金及公積金</p>
+      <div class="topbar">
+        <div class="eyebrow">Commission Calculator</div>
+        <div class="lang" id="lang"><button data-l="tc">繁</button><button data-l="sc">简</button><button data-l="en">EN</button></div>
+      </div>
+      <h1 data-i="title"></h1>
+      <p data-i="sub"></p>
     </div>
   </header>
   <main>
     <div class="tabs">
-      <div class="tab active" data-tab="calc">計算佣金</div>
-      <div class="tab" data-tab="data">佣金資料管理</div>
+      <div class="tab active" data-tab="calc" data-i="tabCalc"></div>
+      <div class="tab" data-tab="data" data-i="tabData"></div>
     </div>
 
     <section id="calc" class="layout">
-      <div class="card side-left">
-        <h2>保單資料</h2>
-        <div class="grid">
-          <div class="full">
-            <div class="row">
-              <div class="catbox"><label>產品類別</label><select id="cat"></select></div>
-              <div class="prodbox"><label>產品</label><select id="product"></select></div>
-            </div>
-            <label class="check"><input type="checkbox" id="showOff" checked> 顯示已停售產品</label>
+      <div class="card">
+        <h2 data-i="hPolicy"></h2>
+        <label><span class="stepno">1</span><span data-i="lProduct"></span></label>
+        <div id="pickSel" class="hidden"></div>
+        <div id="pickBody">
+          <div class="seg" id="seg">
+            <button data-s="all" data-i="stAll"></button>
+            <button data-s="on" data-i="stOn"></button>
+            <button data-s="off" data-i="stOff"></button>
           </div>
-          <div><label>繳付年期</label><select id="term"></select></div>
-          <div><label>投保年齡</label><input id="age" type="number" min="0" step="1" value="35"><div class="hint">投保時的實際年齡</div></div>
-          <div class="full"><label id="premiumLabel">年繳保費</label><input id="premium" type="number" min="0" value="10000"><div class="hint" id="premiumHint"></div></div>
-          <div id="excessWrap"><label>每年超額保費（如有）</label><input id="excess" type="number" min="0" value="0"><div class="hint">超額保費 = 設定保費 − 目標保費</div></div>
-          <div id="yearsWrap"><label>計算年數</label><input id="nYears" type="number" min="1" max="50" step="1" value="10"><div class="hint">最後一個佣金率適用於其後年度</div></div>
-          <div id="topupWrap"><label>額外整付保費（如有）</label><input id="topup" type="number" min="0" value="0"></div>
-          <div id="avWrap"><label>預計戶口價值（選填）</label><input id="av" type="number" min="0" value="0"><div class="hint">用來估算 Trailer Fee</div></div>
+          <div class="chips" id="chips"></div>
+          <input id="q" type="search" data-ph="search">
+          <div class="plist" id="plist"></div>
+        </div>
+        <div class="grid">
+          <div class="full"><label><span class="stepno">2</span><span data-i="lTerm"></span></label><select id="term"></select></div>
+          <div><label><span class="stepno">3</span><span data-i="lAge"></span></label><input id="age" type="number" inputmode="numeric" min="0" step="1" data-ph="agePh"><div class="hint" data-i="ageHint"></div></div>
+          <div><label><span class="stepno">4</span><span id="premiumLabel"></span></label><input id="premium" type="number" inputmode="decimal" min="0" data-ph="premPh"><div class="hint" id="premiumHint"></div></div>
+          <div id="excessWrap"><label data-i="lExcess"></label><input id="excess" type="number" min="0" value="0"><div class="hint" data-i="excessHint"></div></div>
+          <div id="yearsWrap"><label data-i="lYears"></label><input id="nYears" type="number" min="1" max="50" step="1" value="10"><div class="hint" data-i="yearsHint"></div></div>
+          <div id="topupWrap"><label data-i="lTopup"></label><input id="topup" type="number" min="0" value="0"></div>
+          <div id="avWrap"><label data-i="lAv"></label><input id="av" type="number" min="0" value="0"><div class="hint" data-i="avHint"></div></div>
+          <div><label data-i="lPolCur"></label><select id="polCur"></select></div>
+          <div><label data-i="lPayCur"></label><select id="payCur"></select></div>
+          <div class="full">
+            <details class="fx">
+              <summary data-i="fxSettings"></summary>
+              <div class="hint" id="fxStatus"></div>
+              <label style="margin-top:10px" data-i="fxUrl"></label>
+              <input id="fxUrl" type="url" placeholder="https://…/rates.json">
+              <div class="hint" data-i="fxUrlHint"></div>
+              <button class="btn light small" id="fxReload" style="margin-top:8px" data-i="fxReload"></button>
+              <label style="margin-top:12px" data-i="fxManual"></label>
+              <div class="fxgrid" id="fxGrid"></div>
+              <div class="hint" data-i="fxNote"></div>
+            </details>
+          </div>
         </div>
       </div>
       <div class="side-right">
         <div id="info"></div>
         <div class="card">
-          <h2>佣金結果</h2>
+          <h2 data-i="hResult"></h2>
           <div id="result"></div>
         </div>
       </div>
@@ -194,438 +225,283 @@
 
     <section id="data" class="stack hidden">
       <div class="card">
-        <h2>資料檢查</h2>
+        <h2 data-i="hChecks"></h2>
+        <div class="hint" id="dataEnNote"></div>
         <div id="checks"></div>
       </div>
       <div class="card">
-        <h2>現有產品一覽</h2>
+        <h2 data-i="hList"></h2>
         <div class="scroll" id="list"></div>
       </div>
       <div class="card">
-        <h2>產品主檔</h2>
-        <div class="hint">欄位次序：產品代碼、中文名稱、英文名稱、產品類別、指定產品 (Y/N)、額外佣金率、額外整付保費佣金率、Trailer Fee 年率、Trailer 起始年度、備註、產品狀況（現有產品／停售）、推出日期、停售日期、末年佣金率持續適用 (Y/N)、續保年齡上限（保費繳付至某歲的產品填該歲數；沒有則留空）、公積金率、公積金起始年度、公積金結束年度（沒有公積金則三欄留空）、超額保費佣金率（只限萬用壽險，其他留空）。可直接從 Excel 複製貼上。</div>
-        <div class="hint">公積金如分多段，三欄各用「/」分隔而且段數相同，例如公積金率 3%/1.5%/3%、起始年度 7/11/16、結束年度 10/15/99；結束年度填 99 代表直至保費繳付期完結。</div>
+        <h2 data-i="hMaster"></h2>
+        <div class="hint" data-i="masterHint1"></div>
+        <div class="hint" data-i="masterHint2"></div>
         <textarea id="pText"></textarea>
       </div>
       <div class="card">
-        <h2>佣金率表</h2>
-        <div class="hint">欄位次序：產品代碼、繳付年期（數字或「整付」「每年續保」「至85歲」「與保障期相同」等文字）、年齡下限、年齡上限、第1年、第2年……（年度數目不限）。其後的生效日期和備註會自動忽略。繳付年期寫成「至 X 歲」時，網站會自動按 X − 投保年齡計算繳付年數。</div>
+        <h2 data-i="hRates"></h2>
+        <div class="hint" data-i="ratesHint"></div>
         <textarea id="rText"></textarea>
-        <button id="save">更新資料</button>
-        <button id="reset" class="light">還原預設資料</button>
+        <button id="save" class="btn" data-i="save"></button>
+        <button id="reset" class="btn light" data-i="reset"></button>
         <div id="saveMsg"></div>
       </div>
     </section>
   </main>
-  <footer>資料只儲存在這部裝置的瀏覽器內；佣金結果按所輸入的佣金率表估算，正式數字以公司文件為準。</footer>
+  <footer data-i="footer"></footer>
 
+  <script src="data.js"></script>
   <script>
-    const UL_REMARK = "基本計劃；佣金 = 目標保費 × 目標保費佣金率 + 超額保費 × 超額保費佣金率；目標保費可於建議書找到；保額層增加後按新保額層生效年期計算（網站未處理）；額外 10% 及繳付年期待確認";
-    const SW_REMARK = "基本計劃；首年佣金受高投保年齡調整（66–80 歲遞減）；「AIA 健康系列」按未扣除優惠的毛保費計算佣金；Persistency, Persistency Bonus & Career Benefit 適用；公積金不適用（基本計劃）";
-    const OP_REMARK = "基本計劃；每年續保；投保年齡 15 日–70 歲；高投保年齡調整：受保人 66–70 歲，首年至第十年佣金扣減 5 個百分點；個人續保佣金花紅適用；Extra 10% 及公積金不適用（基本計劃版本）；首年佣金調整：Group 5: Regular Premium – A&H – Medical";
-    const FG_REMARK = "基本計劃；只有首年佣金 10%，其後年度不適用；受保媽媽須為「極臻•至尊」／「極臻•至尊明珠」指定計劃選項（年繳保費）的受保人，年滿 18–45 歲，懷孕期第 22 週或以上；高投保年齡調整、個人續保佣金花紅、Extra 10%、公積金、首年保費入賬及首年佣金調整均不適用；繳付方式待確認";
-    const PU_REMARK = "基本計劃；投保年齡 15 日–80 歲；佣金率按投保年齡分四段（0–65、66–70、71–75、76–80）；「AIA 健康系列」按未扣除優惠的毛保費計算佣金；Persistency, Persistency Bonus & Career Benefit 適用；Extra 10% 及公積金不適用（基本計劃）";
-    const CG_REMARK = "基本計劃；每年續保；投保年齡 15 日–70 歲；高投保年齡首年佣金調整：65 歲以上每歲遞減 2%（66 歲 44% 至 70 歲 36%）；「AIA 健康系列」按未扣除優惠的毛保費計算佣金；個人續保佣金花紅適用；Extra 10% 適用（基本計劃）；公積金不適用（基本計劃）；1 Case Count；首年佣金調整：Regular Premium – A&H – Medical Group 5";
-    const HJ_REMARK = "基本計劃；每年續保；投保年齡 15 日–80 歲；首年佣金受高投保年齡調整（66–80 歲遞減）；第 7 年起佣金率為 10%；「AIA 健康系列」按未扣除優惠的毛保費計算佣金；Persistency, Persistency Bonus & Career Benefit 適用；Extra 10% 及公積金不適用（基本計劃）";
-    const VS_REMARK = "基本計劃；投保年齡 15 日–80 歲；首年佣金受高投保年齡調整（66–80 歲遞減）；第 7 年起佣金率為 10%；「AIA 健康系列」按未扣除優惠的毛保費計算佣金；Persistency, Persistency Bonus & Career Benefit 適用；Extra 10% 及公積金不適用（基本計劃）；附加契約版本佣金率不同，網站未加入；首年佣金調整：Regular Premium – A&H – Medical Group 5；繳付年期待確認（暫填每年續保）";
-    const CE_REMARK = "基本計劃；投保年齡 15 日–70 歲；高投保年齡調整：受保人 66–70 歲，首年至第十年佣金扣減 5 個百分點；Persistency, Persistency Bonus & Career Benefit 適用；Extra 10% 及公積金不適用（基本計劃版本）；首年佣金調整：Group 5: Regular Premium – A&H – Medical；繳付年期待確認（暫填每年續保）";
-    const MT_REMARK = "基本計劃（危疾）；投保年齡 40–60 歲；保費繳付至受保人 85 歲（網站假設繳付年數 = 85 − 投保年齡）；High Issue Age FYC Adjustment 不適用；Persistency 適用；Extra 10% 及公積金不適用（基本計劃）；附加契約版本未加入；首年佣金調整：Group 5: Regular Premium – A&H – Medical";
-    const SG_REMARK = "基本計劃（SGHP2）；投保年齡 15 天–70 歲；保費繳付年期與計劃保障期相同（網站按每年繳付計算，沒有設年齡上限）；首年佣金受高投保年齡調整（66–70 歲遞減）；第 7 年起佣金率為 10%；Persistency, Persistency Bonus & Career Benefit 適用；Extra 10% 及公積金不適用；附加契約版本（SGHR2）佣金率不同，網站未加入；首年佣金調整：Group 5: Regular Premium – A&H – Medical；推出日期待補";
-    const EB_REMARK = "基本計劃；整付保費；投保年齡 40–75 歲；High Issue Age FYC Reduction：投保年齡 71–75 歲首年佣金為 3%；只有首年佣金；Persistency & Career Benefit、Extra 10%、公積金及附加契約均不適用；Production Credit：100% FYC；首年佣金調整：組別 1 Single Premium";
-    const WE_REMARK = "基本計劃；整付保費；投保年齡 15 天–75 歲（年齡上限有 * 號附註，條件待確認）；佣金為整付保費之 4%；High Issue Age FYC Adjustment、Persistency & Career Benefit、Extra 10%、公積金及附加契約均不適用；FYP Credit：整付保費之 15%；首年佣金調整：組別 1 (Single Premium)";
-    const WFS_REMARK = "基本計劃；整付保費；投保年齡 15 日–85 歲；High Issue Age FYC Reduction：投保年齡 69 歲以上每加大一歲減 0.1%，至 74 歲為 3%，其後維持 3% 至 85 歲；Persistency & Career Benefit、Extra 10% 及公積金不適用；FYP Credit：整付保費之 15%；首年佣金調整：組別 1 (Single Premium)";
-    const WF5_REMARK = "基本計劃；保費繳付期 5 年；投保年齡 15 日–80 歲；網站的佣金率為基本佣金與優質業務獎金合計：第 1 年 16.95% + 8.05%、第 2 年 2% + 3%、第 3–5 年 2% + 0%；High Issue Age FYC Reduction：投保年齡 69 歲以上每加大一歲減 1%，74–80 歲維持 20%（網站假設由合計 25% 扣減）；Persistency & Career Benefit 適用；Extra 10% 適用，按合計首年佣金率 25% 計算（已確認）；公積金不適用；FYP Credit：首年保費之 80%；首年佣金調整：組別 3 (Regular Premium – 101 Linked and Traditional Savings)";
-    const PL_REMARK = "基本計劃；保費繳付期 5 年（投保年齡 15 日–75 歲）或 30 年（投保年齡 15 日–55 歲）；網站的佣金率為香港區基本佣金與優質業務獎金合計（與澳門區佣金率相同）：5 年為第 1 年 16.95% + 8.05%、第 2 年 2% + 3%、第 3–5 年 2% + 0%；30 年為第 1 年 54% + 0%、第 2 年 3% + 15%、第 3–6 年 3% + 0%；30 年第 7 年起的佣金文件未列，暫作沒有；高齡投保首年佣金調整不適用；Persistency & Career Benefit 適用；Extra 10% 及公積金待確認（暫作不適用）；英文名稱待補";
-    const GFS_REMARK = "基本計劃；整付保費；投保年齡 15 日–80 歲；High Issue Age FYC Reduction：投保年齡 65 歲以上每加大一歲減 0.1%，至 70 歲為 3%，其後維持 3% 至 80 歲；Persistency & Career Benefit、Extra 10%、公積金及附加契約不適用；FYP Credit：整付保費之 15%；首年佣金調整：組別 1 (Single Premium)";
-    const GF5_REMARK = "基本計劃；保費繳付期 5 年；投保年齡 15 日–75 歲；High Issue Age FYC Reduction：投保年齡 65 歲以上每加大一歲減 1%，70–75 歲維持 20%；Persistency & Career Benefit 適用；Extra 10% 適用；公積金不適用；附加契約的佣金網站未加入；FYP Credit：首年保費之 80%；首年佣金調整：組別 3 (Regular Premium – 101 Linked and Traditional Savings)";
-    const WG_REMARK = "基本計劃；整付保費；投保年齡 15 日–80 歲；佣金為整付保費之 3%；High Issue Age FYC Adjustment：受保人 65 歲以上每加大一歲減 0.1%，至 75 歲為 2%，其後維持 2% 至 80 歲；Persistency & Career Benefit、Extra 10%、公積金及附加契約均不適用；FYP Credit：整付保費之 15%；首年佣金調整：組別 1 (Single Premium)；名稱按產品清單，佣金頁名稱為「財富源源」壽險計劃";
-    const AD_REMARK = "基本計劃；保費繳付期 5 年；投保年齡 18–70 歲，上限視乎年金款項開始年齡（50 歲開始：18–45 歲；55 歲：18–50 歲；60 歲：18–55 歲；65 歲：18–60 歲；70 歲：18–65 歲；75 歲：18–70 歲），網站只檢查 18–70 歲；年金期為年金款項開始年齡起計 10 年；High Issue Age FYC Reduction 不適用；Persistency & Career Benefit 適用；Extra 10% 適用；公積金不適用（基本計劃）；附加契約的佣金網站未加入；Production Credit：100% FYC；首年佣金調整：組別 3 Regular Premium – 101 Linked and Traditional Savings";
-    const GPS_REMARK = "基本計劃；整付保費；投保年齡 15 日–80 歲；High Issue Age FYC Reduction：投保年齡 65 歲以上每加大一歲減 0.1%，至 70 歲為 3%，其後維持 3% 至 80 歲；Persistency & Career Benefit、Extra 10%、公積金及附加契約不適用；FYP Credit：整付保費之 15%；首年佣金調整：組別 1 (Single Premium)";
-    const GPR_REMARK = "基本計劃；保費繳付期 3 年（限額發售）、5 年或 10 年；投保年齡：3 年及 5 年 15 日–75 歲，10 年 15 日–70 歲；3 年只有首年佣金 11%；10 年第 7 年起的佣金文件未列，暫作沒有；High Issue Age FYC Reduction：投保年齡 65 歲以上每加大一歲，3 年減 0.3%（70–75 歲維持 9.5%）、5 年減 1%（70–75 歲維持 20%）、10 年減 1%（至 70 歲 30%）；Persistency & Career Benefit 適用；Extra 10% 適用；公積金不適用；附加契約的佣金網站未加入；FYP Credit：3 年為首年保費之 40%、5 年 80%、10 年 100%；首年佣金調整：組別 3 (Regular Premium – 101 Linked and Traditional Savings)";
-    const WER_REMARK = "基本計劃；整付保費；投保年齡 15 日–80 歲；佣金為整付保費之 3%；High Issue Age FYC Adjustment：受保人 65 歲以上每加大一歲減 0.1%，至 75 歲為 2%，其後維持 2% 至 80 歲；Persistency & Career Benefit、Extra 10%、公積金及附加契約均不適用；FYP Credit：整付保費之 15%；首年佣金調整：組別 1 (Single Premium)；名稱按產品清單，佣金頁名稱為「財富顯裕」壽險計劃";
-    const FP_REMARK = "基本計劃；整付保費；投保年齡 15 日–70 歲；佣金為整付保費之 3.5%；High Issue Age FYC Adjustment：受保人 65 歲以上每加大一歲減 0.2%（66 歲 3.3% 至 70 歲 2.5%）；Persistency & Career Benefit、Extra 10%、公積金及附加契約均不適用；FYP Credit：整付保費之 15%；首年佣金調整：組別 1 (Single Premium)；名稱按產品清單，佣金頁名稱為「諾享」保障計劃 2";
-    const SL_REMARK = "基本計劃；保費繳付期 5 年（投保年齡 15 日–75 歲）、10 年（15 日–70 歲）或 25 年（15 日–55 歲）；5 年只有第 1–5 年佣金；10 年及 25 年文件只列到第 6 年；High Issue Age FYC Reduction 不適用；Persistency & Career Benefit 適用；Extra 10% 適用；公積金由第 7 年開始適用，但比率文件未列，網站未計算；附加契約的佣金網站未加入；FYP Credit：5 年為首年保費之 80%，其他 100%；首年佣金調整：組別 2 Regular Premium – Life；名稱按產品清單，佣金頁名稱為「樂怡人生」保障計劃；兩個版本（一般及週年紅利）的佣金率假設相同";
-    const SES_REMARK = "基本計劃；整付保費；投保年齡 15 日–80 歲；High Issue Age FYC Adjustment：受保人 65 歲以上每加大一歲減 0.1%，至 75 歲為 2.5%，其後維持 2.5% 至 80 歲；Persistency & Career Benefit、Extra 10%、公積金及附加契約不適用；FYP Credit：整付保費之 15%；首年佣金調整：組別 1 (Single Premium)；名稱按產品清單，佣金頁名稱為「簡愛‧延續」保障計劃 5";
-    const SER_REMARK = "基本計劃；保費繳付期 5 年（投保年齡 15 日–80 歲）或 10 年（15 日–75 歲）；High Issue Age FYC Adjustment：受保人 65 歲以上每加大一歲，5 年減 1%（至 75 歲 15%，其後維持 15% 至 80 歲）、10 年減 1.5%（至 75 歲 20%）；Persistency & Career Benefit 適用；Extra 10% 適用；公積金：5 年不適用，10 年由第 7 年開始適用，但比率文件未列，網站未計算；10 年文件只列到第 6 年佣金；附加契約的佣金網站未加入；FYP Credit：5 年為首年保費之 80%、10 年 100%；首年佣金調整：組別 3 (Regular Premium – 101 Linked and Traditional Savings)；名稱按產品清單，佣金頁名稱為「簡愛‧延續」保障計劃 5";
-    const FL_REMARK = "基本計劃；保費繳付期 6 年（投保年齡 15 日–65 歲）、10 年（15 日–60 歲）、15 年或 20 年（15 日–55 歲）；文件只列到第 6 年佣金；High Issue Age FYC Adjustment：只適用於 6 年繳，受保人 60 歲以上每加大一歲減 1%（61 歲 24% 至 65 歲 20%）；Persistency & Career Benefit 適用；Extra 10% 適用；公積金適用，但比率及年度文件未列，網站未計算；附加契約的佣金網站未加入；FYP Credit：首年保費之 100%；首年佣金調整：組別 3 (Regular Premium – 101 Linked and Traditional Savings)；名稱按產品清單，佣金頁名稱為愛無憂長享計劃 5；英文名稱待補";
-    const BP_REMARK = "基本計劃；只適用於香港；保費繳付期 5 年或 12 年（投保年齡 18–65 歲）、18 年（18–60 歲）；5 年只有第 1–5 年佣金；12 年及 18 年文件只列到第 6 年；High Issue Age FYC Reduction 不適用；Persistency & Career Benefit 適用；Extra 10% 適用；公積金：5 年不適用，12 年及 18 年由第 7 年開始適用，但比率文件未列，網站未計算；保費按吸煙狀況、性別、投保年齡及核保評級而定；附加契約的佣金網站未加入；FYP Credit：5 年為首年保費之 80%，12 年及 18 年 100%；首年佣金調整：組別 2 (Regular Premium – Life)；佣金頁的計劃名稱為 BP2 (EP)；同一文件的 BP2（5／10 年繳）網站未加入";
-    const ALS_REMARK = "基本計劃；整付保費；投保年齡 15 日–75 歲；只有首年佣金 3.5%；High Issue Age FYC Adjustment、Persistency & Career Benefit、Extra 10%、公積金及附加契約均不適用；FYP Credit：整付保費之 15%；首年佣金調整：組別 1 (Single Premium)；名稱按產品清單，佣金頁名稱為「裕滿人生」保障計劃 2";
-    const ALR_REMARK = "基本計劃；保費繳付期 5 年（投保年齡 15 日–65 歲）、10 年或 18 年（15 日–60 歲）、25 年（15 日–55 歲）；5 年只有第 1–5 年佣金；10 年、18 年及 25 年文件只列到第 6 年；High Issue Age FYC Adjustment 不適用；Persistency & Career Benefit 適用；Extra 10% 適用；公積金由第 7 年開始適用，但比率文件未列，網站未計算（5 年繳是否適用待確認）；保費按吸煙狀況、性別、投保年齡及核保評級而定；附加契約的佣金網站未加入；FYP Credit：5 年為首年保費之 80%，其他 100%；首年佣金調整：組別 2 (Regular Premium – Life)；名稱按產品清單，佣金頁名稱為「裕滿人生」保障計劃 2";
-    const SIS_REMARK = "基本計劃；整付保費；投保年齡 0–80 歲；只有首年佣金 2.97%；High Issue Age FYC Reduction：受保人 65 歲以上每加大一歲減 0.1%（66 歲 2.87% 至 80 歲 1.47%），文件未列下限，網站假設一直扣減至 80 歲；Persistency & Career Benefit、Extra 10%、公積金及附加契約均不適用；FYP Credit：整付保費之 15%；首年佣金調整：組別 1 Single Premium；名稱按產品清單，佣金頁名稱為「活出精彩」入息計劃（整付保費）；產品清單註明只適用於香港，文件的銷售地點為香港及澳門；推出日期按產品清單填 2013-01（整付保費版本的小冊子編號為 0513）";
-    const SIR_REMARK = "基本計劃；保費繳付期 3 年（保障期 17 年）或 5 年（保障期 19 年），入息期 15 年；投保年齡 0–80 歲；3 年為第 1 年 8%、第 2–3 年 1%；5 年為第 1 年 13%、第 2–5 年 1%；High Issue Age FYC Reduction：受保人 65 歲以上每加大一歲，3 年減 0.2%（至 80 歲 5%）、5 年減 0.5%（至 80 歲 5.5%），文件未列下限，網站假設一直扣減至 80 歲；Persistency & Career Benefit 適用；Extra 10% 適用；公積金不適用；附加契約 WP、PB 跟隨基本計劃的佣金，網站未加入；FYP Credit：3 年為首年保費之 40%、5 年 80%；首年佣金調整：組別 3 Regular Premium – 101 Linked and Traditional Savings；名稱按產品清單，佣金頁名稱為「活出精彩」入息計劃；推出日期為 2013 年 1 月 18 日（按申請日期）；產品清單註明只適用於香港，文件的銷售地點為香港及澳門";
-    const ST_REMARK = "基本計劃；保單貨幣美元；計劃分為 STSP8（保費繳付期 3 年，繕發年齡 0–67 歲）、STSP10（7 年，0–65 歲）及 STSP15（12 年，0–60 歲）；STSP8 為第 1 年 8%、第 2–3 年 1%；STSP10 為第 1 年 14%、第 2–6 年 1%；STSP15 為第 1 年 34%、第 2–6 年 1%；文件只列到第 6 年佣金，第 7 年起暫作沒有；文件沒有列出高齡投保首年佣金調整，暫作不適用；Persistency & Career Benefit 適用；Extra 10% 適用；公積金適用，但比率及年度文件未列，網站未計算；附加契約跟隨基本計劃（PACS 除外），網站未加入；FYP Credit：STSP8 為 40% FYP，STSP10 及 STSP15 為 100% FYP；FYC Adjustment：跟隨現行做法；名稱按產品清單，文件名稱為簡易特級高息保 8 年／10 年／15 年儲蓄計劃；同一文件的特級高息保 (TSP8／TSP10／TSP15，首年 9%／16%／36%) 不在產品清單，網站未加入";
-    const GY_REMARK = "基本計劃；保單貨幣美元；保費繳付期 3 年或 5 年（累積期 10 年）、8 年或 12 年（累積期 12 年）、18 年（累積期 18 年）；入息期 10 年、15 年或至 110 歲；繕發年齡 0–60 歲（入息期至 110 歲為 18–60 歲，網站只檢查 0–60 歲）；3 年為第 1 年 10%、第 2–3 年 1%；5 年為第 1 年 15%、第 2–5 年 1%；8 年為第 1 年 18%、第 2–6 年 2%；12 年為第 1 年 23.5%、第 2–6 年 2%；18 年為第 1 年 36%、第 2–6 年 3%；文件只列到第 6 年佣金，第 7 年起暫作沒有；High Issue Age FYC Adjustment 不適用；Persistency & Career Benefit 適用；Extra 10% 適用；公積金適用，但比率及年度文件未列，網站未計算；附加契約跟隨基本計劃，網站未加入；FYP Credit：3 年為 40%、5 年 80%、8／12／18 年 100%；FYC Adjustment：跟隨現行規則；名稱按產品清單，文件名稱為「年金寶」入息計劃；推出日期按產品清單填 2007-06，文件的銷售日期為 2008 年 7 月 25 日（首個保單申請日）";
-    const OY_COMMON = "10 年為第 1 年 30%、第 2 年 5%、第 3–6 年 3%；18 年為第 1 年 50%、第 2 年 10%、第 3–6 年 3%；25 年為第 1 年 54%、第 2 年 15%、第 3–6 年 3%；文件只列到第 6 年佣金，第 7 年起暫作沒有；高投保年齡之首年佣金調整不適用；個人續保佣金花紅適用；公積金適用，但比率及年度文件未列，網站未計算；附加契約的佣金網站未加入；獲配首年保費入賬 100%；每張保單計 1 個 Life Case Count 及 1 個 A&H Rider Case Count；此產品同時列於終身壽險及儲蓄壽險清單和危疾清單，網站歸入危疾";
-    const EO_REMARK = "基本計劃；危疾保障計劃（限期繳費終身壽險）；保單貨幣美元；保費繳付期 10 年（投保年齡 15 日–65 歲）、18 年（15 日–62 歲）或 25 年（15 日–55 歲）；" + OY_COMMON + "；Extra 10% 適用；FYC Adjustment：Regular Premium – Life (Group 2) 63%、Regular Premium – A&H – CI (Group 4) 37%；銷售日期 2025 年 9 月 23 日（以申請日期為準）";
-    const OY_REMARK = "基本計劃；危疾保障計劃；保單貨幣美元；保費繳付期 10 年（投保年齡 15 日–65 歲）、18 年（15 日–62 歲）或 25 年（15 日–55 歲）；" + OY_COMMON + "；額外保費的佣金為 5%（所有繳付年期），網站未計算，請只輸入定期保費；Extra 10%：不選擇支付額外保費時適用，選擇支付額外保費時只適用於定期保費；FYC Adjustment：Regular Premium – Life (Group 2) 45%、Regular Premium – A&H – CI (Group 4) 55%";
-    const OF_REMARK = "基本計劃；危疾保障計劃；保單貨幣美元；保費繳付期 10 年、18 年或 25 年；受保媽媽投保年齡 18–45 歲，懷孕期第 22 週或以上（網站的投保年齡請輸入受保媽媽的年齡）；佣金頁沒有分開列出，佣金率假設與「愛伴航」保險計劃2 相同；" + OY_COMMON + "；額外保費的佣金為 5%（所有繳付年期），網站未計算，請只輸入定期保費；Extra 10%：不選擇支付額外保費時適用，選擇支付額外保費時只適用於定期保費；FYC Adjustment：Regular Premium – Life (Group 2) 45%、Regular Premium – A&H – CI (Group 4) 55%";
-    const AA_REMARK = "基本計劃；危疾保障計劃（限期繳費壽險）；保費繳付期 10 年（投保年齡 15 日–65 歲）、18 年（15 日–62 歲）、25 年（15 日–55 歲）或 30 年（15 日–50 歲）；所有所選保障類別的保費繳付年期必須相同；10 年為第 1 年 29%、第 2 年 5%、第 3–6 年 3%；18 年為第 1 年 50%、第 2 年 10%、第 3–6 年 3%；25 年為第 1 年 54%、第 2 年 15%、第 3–6 年 3%；30 年為第 1 年 54%、第 2 年 27%、第 3–6 年 3%；文件只列到第 6 年佣金，第 7 年起暫作沒有；High Issue Age FYC Adjustment 不適用；Persistency Bonus & Career Benefit 適用；Extra 10% 適用；公積金適用，但比率及年度文件未列，網站未計算；附加契約不適用；獲配首年保費入賬 100%；FYC Adjustment：人壽保障類別為 Regular Premium – Life (Group 2)，危疾保障類別為 Regular Premium – A&H – CI (Group 4)；每張保單計 1 個 Life Case Count 及 1 個 A&H Rider Case Count；名稱按產品清單，文件名稱為「自在自選」危疾保；銷售日期 2023 年 5 月 19 日；此產品同時列於終身壽險及儲蓄壽險清單和危疾清單，網站歸入危疾";
-    const EG_REMARK = "基本計劃；危疾；每年續保，可續保至受保人 85 歲（網站假設最多繳付 85 − 投保年齡 年）；投保年齡 18–65 歲；續保保費非保證，按續保時受保人的年齡而定，網站假設每年保費不變；第 1 年 30%、第 2 年 10%、第 3 年起 5%；High Issue Age FYC Adjustment 不適用；Persistency & Career Benefit 適用；Extra 10%、公積金及附加契約均不適用；獲配首年保費入賬：100% of First Year Premium；1 個 Life Case Count；FYC Adjustment：組別 4 Regular Premium – A&H – CI";
-    const SC_REMARK = "基本計劃；危疾；保障至 80 歲，網站假設保費繳付至 80 歲（繳付年數 = 80 − 投保年齡）；投保年齡 15 日–65 歲；保費每五年續保時遞增，非保證，網站假設每年保費不變，第 2 年起的佣金只屬估算；第 1 年 46%、第 2 年 17%、第 3 年及以上 5%；High Issue Age FYC Adjustment 不適用；Persistency & Career Benefit 適用；Extra 10% 不適用（基本計劃）；公積金只適用於附加契約；附加契約版本（第 3–6 年 5%，Extra 10% 跟隨基本計劃）網站未加入；保額達 250,000 美元或 1,875,000 港元／澳門幣有 20% 保費折扣，佣金按折扣前或折扣後保費計算待確認；FYP Credit：首年保費 100%；首年佣金調整：Regular Premium – A&H – CI (Group 4)；一般版與明珠版佣金率相同";
-    const LU_REMARK = "基本計劃；癌症保障；保單貨幣美元；保費繳付期 18 年（投保年齡 15 日–65 歲）、25 年（15 日–55 歲）或至 65 歲（15 日–55 歲，網站假設繳付年數 = 65 − 投保年齡，按文件年齡直接計算，是否以下次生日年齡計待核對）；18 年為第 1 年 50%、第 2 年 10%、第 3–6 年 3%；25 年為第 1 年 54%、第 2 年 15%、第 3–6 年 3%；至 65 歲按投保年齡：0–45 歲 54%／15%／3%，46–55 歲首年由 52% 遞減至 29%、第 2 年由 10% 遞減至 5%；第 7 年起沒有佣金；High Issue Age FYC Adjustment 不適用；Persistency & Career Benefit 適用；Extra 10% 適用；公積金由第 7 個保單年度起：第 7–10 年 3%、第 11–15 年 1.5%、其後 3%，直至保費繳付期完結，不計入佣金總額；附加契約不適用；FYP Credit：首年保費 100%；每張保單計 1 個 Life Case Count；首年佣金調整：Regular Premium – A&H – CI (Group 4) 100%；一般版與明珠版佣金率相同；舊中文名稱為「進添」癌症保障計劃；名稱按產品清單，文件名稱為「進添」計劃 – 癌症保障";
-    const CC_REMARK = "基本計劃；癌症保障（傳統壽險，非分紅）；每年續保，可續保至受保人 80 歲；投保年齡 18–60 歲；貨幣港元／澳門幣；年繳或月繳；續保保費非保證，按續保時受保人的年齡而定，網站假設每年保費不變，第 2 年起的佣金只屬估算；第 1 年 22.95%、第 2 年 8.5%、第 3–6 年 10%，第 7 年起文件未列，暫作沒有；High Issue Age FYC Adjustment 不適用；Persistency & Career Benefit 適用；Extra 10%、公積金及附加契約均不適用；FYP Credit：首年保費 100%；首年佣金調整：Regular Premium – A&H – CI (Group 4)";
-    const CI_COMMON = "10 年為第 1 年 29%、第 2 年 5%、第 3–6 年 3%；18 年為第 1 年 50%、第 2 年 10%、第 3–6 年 3%；25 年為第 1 年 54%、第 2 年 15%、第 3–6 年 3%；文件只列到第 6 年佣金，第 7 年起暫作沒有；High Issue Age FYC Adjustment 不適用；Persistency & Career Benefit 適用；Extra 10% 適用；公積金適用，但比率及年度文件未列，網站未計算；附加契約的佣金網站未加入；FYP Credit：首年保費 100%；每張保單計 1 個 Life Case Count 及 1 個 A&H Rider Case Count";
-    const SEU_REMARK = "基本計劃；危疾（傳統壽險）；保費繳付期 10 年（投保年齡 15 日–65 歲）、18 年（15 日–62 歲）或 25 年（15 日–55 歲）；" + CI_COMMON + "；FYC Adjustment：Regular Premium – Life (Group 2) 44%、Regular Premium – A&H – CI (Group 4) 56%；名稱按產品清單，文件名稱為「多重智倍保」；產品清單註明只適用於香港，文件的銷售地點為香港／澳門";
-    // 「加裕倍安保」、「加裕倍安保（加強版）」及「進泰安心保 2」同一文件，佣金率相同
-    const PE_COMMON = "基本計劃；危疾（傳統壽險）；保費繳付期 10 年（投保年齡 15 日–65 歲）、18 年（15 日–62 歲）或 25 年（15 日–55 歲）；保費並非保證，但不會按年齡增加而遞增；" + CI_COMMON + "；設有大額保額保費調整及健康生活折扣，佣金按調整前或調整後保費計算待確認；文件的銷售地點為香港／澳門";
-    const PCP_REMARK = PE_COMMON + "；FYC Adjustment：Regular Premium – Life (Group 2) 62%、Regular Premium – A&H – CI (Group 4) 38%；名稱按產品清單，文件名稱為「進泰安心保 2」；產品清單註明只適用於香港；同一文件的「加裕倍安保」及「加裕倍安保（加強版）」見 CI13、CI14";
-    const PE_REMARK = PE_COMMON + "；FYC Adjustment：Regular Premium – Life (Group 2) 60%、Regular Premium – A&H – CI (Group 4) 40%；與「進泰安心保 2」(CI12) 同一文件；不在現有產品清單，網站暫列為停售，推出及停售日期待補";
-    const PEP_REMARK = PE_COMMON + "；FYC Adjustment：Regular Premium – Life (Group 2) 56%、Regular Premium – A&H – CI (Group 4) 44%；與「進泰安心保 2」(CI12) 同一文件；不在現有產品清單，網站暫列為停售，推出及停售日期待補";
-    // 「泰然安心保 2」及「多重安心保 2」同一文件，佣金率相同；各設計劃 80 及計劃 100
-    const EM_COMMON = "基本計劃；危疾（傳統壽險）；設計劃 80 及計劃 100，兩者佣金率相同，網站合用一個代碼；保費繳付期 5 年、10 年或 15 年（投保年齡 0–65 歲）、18 年（0–62 歲）或 25 年（0–55 歲）；均衡保費，但保費率並非保證；5 年為第 1 年 20%、第 2 年 3%、第 3–5 年 3%；10 年為第 1 年 29%、第 2 年 5%、第 3–6 年 3%；15 年為第 1 年 39%、第 2 年 10%、第 3–6 年 3%；18 年為第 1 年 50%、第 2 年 10%、第 3–6 年 3%；25 年為第 1 年 54%、第 2 年 15%、第 3–6 年 3%；文件只列到第 6 年佣金，第 7 年起暫作沒有；High Issue Age FYC Adjustment 不適用；Persistency & Career Benefit 適用；Extra 10% 適用；公積金適用，但比率及年度文件未列，網站未計算（5 年繳是否適用待確認）；附加契約的佣金網站未加入；FYP Credit：5 年為首年保費 80%，其他 100%；每張保單計 1 個 Life Case Count 及 1 個 A&H Rider Case Count；設有大額保額保費調整及健康生活折扣，佣金按調整前或調整後保費計算待確認；產品清單註明只適用於香港，文件的銷售地點為香港及澳門";
-    const ECP_REMARK = EM_COMMON + "；FYC Adjustment：計劃 80 為 Regular Premium – Life (Group 2) 78%、Regular Premium – A&H – CI (Group 4) 22%，計劃 100 為 73%、27%；名稱按產品清單，文件名稱為「泰然安心保 2」";
-    const MCP_REMARK = EM_COMMON + "；FYC Adjustment：計劃 80 為 Regular Premium – Life (Group 2) 62%、Regular Premium – A&H – CI (Group 4) 38%，計劃 100 為 56%、44%；名稱按產品清單，文件名稱為「多重安心保 2」";
-    // 「AIA 唯一摯保」系列（嚴重程度健康保障）：全面保障、癌症及嚴重傳染病保障，各設普通版及明珠版，佣金率相同
-    const AO_REMARK = "基本計劃；嚴重程度健康保障；保費形式分每年續保及每 5 年續保，可續保至受保人 85 歲（網站假設最多繳付 85 − 投保年齡 年）；投保年齡 15 日–65 歲；續保保費非保證，按續保時受保人的年齡而定，網站假設每年保費不變，第 2 年起的佣金只屬估算；每年續保為第 1 年 30%、第 2 年 10%、第 3 年起 5%；每 5 年續保為第 1 年 46%、第 2 年 17%、第 3 年起 5%；High Issue Age FYC Adjustment 不適用；Persistency & Career Benefit 適用；Extra 10% 及公積金不適用（基本計劃）；附加契約版本（第 7 年起以公積金型式：第 7–10 年 5%、第 11–15 年 1.5%、第 16 年起 3%，Extra 10% 跟隨所附加之基本計劃）網站未加入；保額達 250,000 美元或 1,875,000 港元／澳門幣有 20% 大額保費折扣，佣金按折扣前或折扣後保費計算待確認；健康生活折扣不適用；FYP Credit：首年保費 100%；1 個 Life Case Count；FYC Adjustment：Regular Premium – A&H – CI (Group 4)；文件的銷售地點為香港／澳門；名稱、簡稱及推出日期按產品清單，文件名稱為「AIA 唯一摯保」系列 (AIA One Absolute Series)；文件的佣金頁沒有分開兩個系列，亦沒有分開普通版本及明珠版本，四個代碼的佣金率假設相同；英文全名待補";
-    const DEF_P = [
-      "ILP01\tAIA「兩全保」保障型投資相連壽險計劃（定期保費）\tAIA 2-in-1 Protection Linked Plan (Regular Premium)\t投資相連\tN\t0%\t2.7%\t0.3%\t7\tTrailer Fee 按基本戶口價值計算；個人續保佣金花紅及續保率適用；首年佣金調整：組別2－定期保費－人壽\t現有產品\t2023-05\t\tN\t",
-      "ILP02\tAIA「兩全保」保障型投資相連壽險計劃（整付保費）\tAIA 2-in-1 Protection Linked Plan (Single Premium)\t投資相連\tN\t0%\t2.7%\t0.15%\t7\tTrailer Fee 按基本戶口價值計算（Production agent）；Direct leader 另有 0.05%；首年佣金調整：組別1－整付保費\t現有產品\t2023-05\t\tN\t",
-      "ILP03\t卓達智悅 2\tTreasure Master Plus 2\t投資相連\tN\t0%\t0%\t0.15%\t7\tTrailer Fee 按戶口價值計算（Production agent）；Direct leader 另有 0.05%；首年佣金調整：組別1－整付保費\t現有產品\t2023-05\t\tN\t",
-      "ILP04\t卓耀明珠2\tTreasure Pearl 2\t投資相連\tN\t0%\t0%\t0%\t\tFYC 不包括行政費用；首年佣金調整：Group 1－整付保費\t停售\t2015-01\t2023-05\tN\t",
-      "PA01\t自選人身意外保險3\tPAC Select 3\t個人意外\tN\t0%\t0%\t0%\t\t附加契約；首年佣金受高投保年齡調整（66–70 歲遞減）；個人續保佣金花紅不適用\t現有產品\t2024-01\t\tY\t",
-      "PA02\t「銀意保」\tSilvery Protect (SP)\t個人意外\tY\t10%\t0%\t0%\t\t基本計劃；個人續保佣金花紅適用；首年佣金調整：Group (6) Regular Premium – A&H – Accident\t現有產品\t2021-04\t\tY\t",
-      "PA03\t「添意保」\tXtra Protect (XP)\t個人意外\tY\t10%\t0%\t0%\t\t基本計劃；個人續保佣金花紅適用；首年佣金調整適用\t現有產品\t2020-05\t\tY\t",
-      "PA04\t「競跑保」\tRunner Guard\t個人意外\tN\t0%\t0%\t0%\t\t基本計劃；Persistency 不適用；不計保單數目；投保必須透過 iPoS\t現有產品\t2018-11\t\tN\t",
-      "PA05\t盛年意家保\tSuper Adults Shield (SAS)\t個人意外\tN\t0%\t0%\t0%\t\t基本計劃；每年續保直至保障有效期完結；繕發年齡 18–65；不適用 Life Persistency，但適用於 PA persistency\t現有產品\t2017-06\t\tY\t76",
-      "PA06\t童年意家保\tSuper Kids Shield (SKS)\t個人意外\tN\t0%\t0%\t0%\t\t基本計劃；每年續保直至保障有效期完結；繕發年齡 2–17；續保時受保人須為全日制學生；不適用 Life Persistency，但適用於 PA persistency\t現有產品\t2017-06\t\tY\t24",
-      "PA07\t豐年意家保\tSuper Seniors Shield (SSS)\t個人意外\tN\t0%\t0%\t0%\t\t基本計劃；每年續保直至保障有效期完結；繕發年齡 50–70；不適用 Life Persistency，但適用於 PA persistency\t現有產品\t2017-06\t\tY\t80",
-      "PA08\t意安心升級意外保險計劃\tSecure First Plus Accident Insurance Plan\t個人意外\tY\t10%\t0%\t0%\t\t基本計劃；保費繳付期 12 年；投保年齡 0–63；Persistency & Career Benefit 適用；首年佣金調整：組別(9)－Secure First Plus\t現有產品\t2017-05\t\tN\t\t5%\t7\t12",
-      "PA09\t「常伴您」保費退還意外升級保險計劃\tHere For You Refundable Accident Plus Insurance Plan\t個人意外\tY\t10%\t0%\t0%\t\t基本計劃；保費繳付期 8 年；文件的投保年齡為下次生日年齡（主要受保人及配偶 18–56 歲，子女 15 日–17 歲），網站已換算為實際年齡 0–55 歲；Persistency & Career Benefit 適用；附加契約不適用；首年佣金調整：Group 5: Regular Premium – A&H – Medical\t現有產品\t2016-04\t\tN\t\t2%\t7\t8",
-      "PA10\t意安心意外保險計劃\tSecure First Accident Insurance Plan\t個人意外\tY\t10%\t0%\t0%\t\t基本計劃；保費繳付期 12 年；投保年齡 0–63；Persistency 及 Career Benefit 適用；首年佣金調整：組別(9)－Secure First\t現有產品\t2013-05\t\tN\t\t5%\t7\t12",
-      "UL01\t「財富相傳」人壽保險計劃5\tWealth Preserver 5 (WP5)\t萬用壽險\tN\t0%\t0%\t0%\t\t" + UL_REMARK + "；投保年齡 18–75 歲\t現有產品\t2016-07\t\tY\t\t\t\t\t2.5%",
-      "UL02\t「財富雋永」人壽保險計劃2\tWealth Ultima 2 (WU2)\t萬用壽險\tN\t0%\t0%\t0%\t\t" + UL_REMARK + "；投保年齡 18–75 歲\t現有產品\t2016-07\t\tY\t\t\t\t\t2.5%",
-      "UL03\t「財富雋永」壽險計劃\tWealth Ultima (WU)\t萬用壽險\tN\t0%\t0%\t0%\t\t" + UL_REMARK + "；佣金率按 WP5／WU2 文件所述相同；投保年齡待確認\t停售\t2014-08\t2016-07\tY\t\t\t\t\t2.5%",
-      "UL04\t「財富相傳3」壽險計劃\tWealth Preserver 3 (WP3)\t萬用壽險\tN\t0%\t0%\t0%\t\t" + UL_REMARK + "；佣金率按 WP5／WU2 文件所述相同；投保年齡待確認\t停售\t2012-06\t2016-07\tY\t\t\t\t\t2.5%",
-      "MD01\t「啟護您」–癌症藥物保障\tFS\t醫療\tY\t10%\t0%\t0%\t\t基本計劃；保費繳付期：每年續保；投保年齡 15 日–75 歲；高投保年齡首年佣金調整：65 歲以上每歲遞減 2%（66 歲 44% 至 75 歲 26%）；「AIA 健康系列」按未扣除優惠的毛保費計算佣金；個人續保佣金花紅適用；公積金不適用；首年佣金調整：Group 5: Regular Premium – A&H – Medical\t現有產品\t2026-10\t\tY\t",
-      "MD02\t[友扣稅] AIA自願醫保睿選計劃\tAIA Voluntary Health Insurance SelectWise Scheme (AVSW)\t醫療\tN\t0%\t0%\t0%\t\t" + SW_REMARK + "\t現有產品\t2025-10\t\tY\t",
-      "MD03\t「睿選明珠」醫療計劃\tSelectWise Pearl Medical Plan (SWP)\t醫療\tN\t0%\t0%\t0%\t\t" + SW_REMARK + "\t現有產品\t2025-10\t\tY\t",
-      "MD04\t極臻•至尊醫療計劃\tOptimaCEO Medical Plan (OPCEO)\t醫療\tN\t0%\t0%\t0%\t\t" + OP_REMARK + "；牙科惠益只接受投保至 65 歲\t現有產品\t2024-11\t\tY\t",
-      "MD05\t極臻•至尊醫療計劃 — 首護摯寶\tOPCEOFG\t醫療\tN\t0%\t0%\t0%\t\t" + FG_REMARK + "\t現有產品\t2024-11\t\tN\t",
-      "MD06\t極臻•至尊明珠醫療計劃\tOptimaCEO Pearl Medical Plan (OPCEOP)\t醫療\tN\t0%\t0%\t0%\t\t" + OP_REMARK + "\t現有產品\t2024-11\t\tY\t",
-      "MD07\t極臻•至尊明珠醫療計劃 — 首護摯寶\tOPCEOPFG\t醫療\tN\t0%\t0%\t0%\t\t" + FG_REMARK + "\t現有產品\t2024-11\t\tN\t",
-      "MD08\t[友扣稅] AIA自願醫保尊耀計劃\tAIA Voluntary Health Insurance Privilege Ultra Scheme (AVPU)\t醫療\tN\t0%\t0%\t0%\t\t" + PU_REMARK + "；繳付年期待確認（暫填每年續保）\t現有產品\t2024-04\t\tY\t",
-      "MD09\t「大灣醫薈通」門診計劃\tGBAOP\t醫療\tN\t0%\t0%\t0%\t\t基本計劃；每年續保；投保年齡 15 日–75 歲；「AIA 健康系列」按未扣除優惠的毛保費計算佣金；高投保年齡首年佣金調整、個人續保佣金花紅、Extra 10% 及公積金均不適用（基本計劃）；首年佣金調整：Group 10 Regular Premium – A&H – Outpatient\t現有產品\t2024-04\t\tY\t",
-      "MD10\t「尊耀明珠」醫療計劃\tPrivilege Ultra Pearl Medical Plan (PUP)\t醫療\tN\t0%\t0%\t0%\t\t" + PU_REMARK + "；每年續保；首年佣金調整：Regular Premium – A&H – Medical Group 5\t現有產品\t2024-04\t\tY\t",
-      "MD11\t癌症全方位保障3\tCancer Guardian 3 (CG3)\t醫療\tY\t10%\t0%\t0%\t\t" + CG_REMARK + "\t現有產品\t2022-10\t\tY\t",
-      "MD12\t癌症全方位明珠保障3\tCancer Guardian Pearl 3 (CGP3)\t醫療\tY\t10%\t0%\t0%\t\t" + CG_REMARK + "\t現有產品\t2022-10\t\tY\t",
-      "MD13\t「全程守護健康保」\tHJG\t醫療\tN\t0%\t0%\t0%\t\t" + HJ_REMARK + "\t現有產品\t2022-01\t\tY\t",
-      "MD14\t[友扣稅] AIA自願醫保靈活計劃\tAVF\t醫療\tN\t0%\t0%\t0%\t\t" + VS_REMARK + "\t現有產品\t2019-04\t\tY\t",
-      "MD15\t[友扣稅] AIA自願醫保標準計劃\tAVS\t醫療\tN\t0%\t0%\t0%\t\t" + VS_REMARK + "\t現有產品\t2019-04\t\tY\t",
-      "MD16\t至尊醫療計劃5\tCEO5\t醫療\tN\t0%\t0%\t0%\t\t" + CE_REMARK + "\t現有產品\t2017-10\t\tY\t",
-      "MD17\t至尊明珠醫療計劃5\tCEOP5\t醫療\tN\t0%\t0%\t0%\t\t" + CE_REMARK + "\t現有產品\t2017-10\t\tY\t",
-      "MD18\t「都市三保」醫療危疾保障計劃\tMT\t醫療\tN\t0%\t0%\t0%\t\t" + MT_REMARK + "\t現有產品\t2017-09\t\tY\t85",
-      "MD19\t「都市三保明珠」醫療危疾保障計劃\tMTP\t醫療\tN\t0%\t0%\t0%\t\t" + MT_REMARK + "\t現有產品\t2017-09\t\tY\t85",
-      "MD20\t「常伴您」保費退還住院現金保險計劃\tHere For You Refundable Hospital Cash (ROPHC)\t醫療\tY\t10%\t0%\t0%\t\t基本計劃；保單年期及保費繳付期 10 年；投保年齡：主要受保人及配偶計劃一／二／三 18–60 歲、計劃四 18–50 歲，子女（計劃一）5–17 歲，網站照文件數字填 5–60 歲，未換算；配偶可享 85 折優惠；High Issue Age FYC Reduction 不適用；Persistency & Career Benefit 適用；附加契約不適用；首年佣金調整：Group 5: Regular Premium – A&H – Medical\t現有產品\t2015-05\t\tN\t\t2%\t7\t10",
-      "MD21\t特級「健康之寶」2\tSGHP2\t醫療\tN\t0%\t0%\t0%\t\t" + SG_REMARK + "\t現有產品\t\t\tY\t",
-      "SV01\t優悅年金保險計劃\tEverBliss Annuity Insurance Plan (EBAP)\t終身及儲蓄壽險\tN\t0%\t0%\t0%\t\t" + EB_REMARK + "\t現有產品\t2026-09\t\tN\t",
-      "SV02\t「財富恆裕」人壽保險計劃3\tWealth Elite Life Insurance Plan 3 (WE3)\t終身及儲蓄壽險\tN\t0%\t0%\t0%\t\t" + WE_REMARK + "\t現有產品\t2026-08\t\tN\t",
-      "SV03\t財富盈活儲蓄保險計劃（整付保費）\tWealth Flexi Savings Insurance Plan (WF) – Single Premium\t終身及儲蓄壽險\tN\t0%\t0%\t0%\t\t" + WFS_REMARK + "\t現有產品\t2026-06\t\tN\t",
-      "SV04\t財富盈活儲蓄保險計劃（5 年繳）\tWealth Flexi Savings Insurance Plan (WF) – 5 Pay\t終身及儲蓄壽險\tY\t10%\t0%\t0%\t\t" + WF5_REMARK + "\t現有產品\t2026-06\t\tN\t",
-      "SV05\t「活然人生」保險計劃\t\t終身及儲蓄壽險\tN\t0%\t0%\t0%\t\t" + PL_REMARK + "\t現有產品\t2026-01\t\tN\t",
-      "SV06\t環宇盈活儲蓄保險計劃（整付保費）\tGlobalFlexi Savings Insurance Plan (GF) – Single Premium\t終身及儲蓄壽險\tN\t0%\t0%\t0%\t\t" + GFS_REMARK + "\t現有產品\t2025-07\t\tN\t",
-      "SV07\t環宇盈活儲蓄保險計劃（5 年繳）\tGlobalFlexi Savings Insurance Plan (GF) – 5 Pay\t終身及儲蓄壽險\tY\t10%\t0%\t0%\t\t" + GF5_REMARK + "\t現有產品\t2025-07\t\tN\t",
-      "SV08\t「財富源源」儲蓄保險計劃\tWealth Generation (WG)\t終身及儲蓄壽險\tN\t0%\t0%\t0%\t\t" + WG_REMARK + "\t現有產品\t2025-06\t\tN\t",
-      "SV09\t[友扣稅] AIA延期年金計劃2\tAIA Deferred Annuity Plan 2 (ADAP2)\t終身及儲蓄壽險\tY\t10%\t0%\t0%\t\t" + AD_REMARK + "\t現有產品\t2025-02\t\tN\t",
-      "SV10\t盈御多元貨幣儲蓄保險計劃3（整付保費）\tGlobal Power Multi-Currency Plan 3 (GP3) – Single Premium\t終身及儲蓄壽險\tN\t0%\t0%\t0%\t\t" + GPS_REMARK + "\t現有產品\t2024-01\t\tN\t",
-      "SV11\t盈御多元貨幣儲蓄保險計劃3（3／5／10 年繳）\tGlobal Power Multi-Currency Plan 3 (GP3) – 3/5/10 Pay\t終身及儲蓄壽險\tY\t10%\t0%\t0%\t\t" + GPR_REMARK + "\t現有產品\t2024-01\t\tN\t",
-      "SV12\t「財富顯裕」儲蓄保險計劃\tWealth Enrich (WER)\t終身及儲蓄壽險\tN\t0%\t0%\t0%\t\t" + WER_REMARK + "\t現有產品\t2022-01\t\tN\t",
-      "SV13\t「諾享」儲蓄保險計劃2\tFortune Promise 2 (FP2)\t終身及儲蓄壽險\tN\t0%\t0%\t0%\t\t" + FP_REMARK + "\t現有產品\t2022-01\t\tN\t",
-      "SV14\t「樂怡人生」保險計劃\tSerene Life\t終身及儲蓄壽險\tY\t10%\t0%\t0%\t\t" + SL_REMARK + "\t現有產品\t2021-08\t\tN\t",
-      "SV15\t「樂怡人生」保險計劃（週年紅利）\tSerene Life (Annual Dividends)\t終身及儲蓄壽險\tY\t10%\t0%\t0%\t\t" + SL_REMARK + "\t現有產品\t2021-08\t\tN\t",
-      "SV16\t「簡愛．延續」儲蓄保險計劃5（整付保費）\tSimply Love Encore 5 (SLE5) – Single Premium\t終身及儲蓄壽險\tN\t0%\t0%\t0%\t\t" + SES_REMARK + "\t現有產品\t2021-07\t\tN\t",
-      "SV17\t「簡愛．延續」儲蓄保險計劃5（5／10 年繳）\tSimply Love Encore 5 (SLE5) – 5/10 Pay\t終身及儲蓄壽險\tY\t10%\t0%\t0%\t\t" + SER_REMARK + "\t現有產品\t2021-07\t\tN\t",
-      "SV18\t愛無憂長享儲蓄保險計劃5\tFLCP5\t終身及儲蓄壽險\tY\t10%\t0%\t0%\t\t" + FL_REMARK + "\t現有產品\t2019-06\t\tN\t",
-      "SV19\t「充裕未來」人壽保險計劃2（特級保障）\tBonus Power Plan 2 – BP2 (EP) (BPEP2)\t終身及儲蓄壽險\tY\t10%\t0%\t0%\t\t" + BP_REMARK + "\t現有產品\t2016-12\t\tN\t",
-      "SV20\t「裕滿人生」保險計劃2（整付保費）\tAdmire Life 2 (AL2) – Single Premium\t終身及儲蓄壽險\tN\t0%\t0%\t0%\t\t" + ALS_REMARK + "\t現有產品\t2013-12\t\tN\t",
-      "SV21\t「裕滿人生」保險計劃2（5／10／18／25 年繳）\tAdmire Life 2 (AL2) – 5/10/18/25 Pay\t終身及儲蓄壽險\tY\t10%\t0%\t0%\t\t" + ALR_REMARK + "\t現有產品\t2013-12\t\tN\t",
-      "SV22\t「活出精彩」入息保險計劃（整付保費）\tSpring Income Plan (SIP) – Single Premium\t終身及儲蓄壽險\tN\t0%\t0%\t0%\t\t" + SIS_REMARK + "\t現有產品\t2013-01\t\tN\t",
-      "SV23\t「活出精彩」入息保險計劃（3／5 年繳）\tSpring Income Plan (SIP) – 3/5 Pay\t終身及儲蓄壽險\tY\t10%\t0%\t0%\t\t" + SIR_REMARK + "\t現有產品\t2013-01\t\tN\t",
-      "SV24\t簡易特級高息儲蓄保險計劃\tSpecial Target Saver Plus 8/10/15 (STSP)\t終身及儲蓄壽險\tY\t10%\t0%\t0%\t\t" + ST_REMARK + "\t現有產品\t2009-03\t\tN\t",
-      "SV25\t「年金寶」入息保險計劃\tGYIP\t終身及儲蓄壽險\tY\t10%\t0%\t0%\t\t" + GY_REMARK + "\t現有產品\t2007-06\t\tN\t",
-      "CI01\t「簡緻•愛伴航」保險計劃\tEssence – On Your Side Insurance Plan (EOYS)\t危疾\tY\t10%\t0%\t0%\t\t" + EO_REMARK + "\t現有產品\t2025-09\t\tN\t",
-      "CI02\t「愛伴航」保險計劃2\tOn Your Side Insurance Plan 2 (OYS2)\t危疾\tY\t10%\t0%\t0%\t\t" + OY_REMARK + "\t現有產品\t2025-09\t\tN\t",
-      "CI03\t「愛伴航 – 首護摯寶」保險計劃2\tOYS2FG\t危疾\tY\t10%\t0%\t0%\t\t" + OF_REMARK + "\t現有產品\t2025-09\t\tN\t",
-      "CI04\t「自在自選」危疾保險計劃\tAIA Assemble (AA)\t危疾\tY\t10%\t0%\t0%\t\t" + AA_REMARK + "\t現有產品\t2023-05\t\tN\t",
-      "CI05\t守康易危疾保\tEasyGuard Care Essence (EGCE)\t危疾\tN\t0%\t0%\t0%\t\t" + EG_REMARK + "\t現有產品\t2021-04\t\tY\t85",
-      "CI06\t簡護危疾保\tSimple Care Essence (SCE)\t危疾\tN\t0%\t0%\t0%\t\t" + SC_REMARK + "\t現有產品\t2020-07\t\tY\t80",
-      "CI07\t簡護危疾明珠保\tSimple Care Essence (Pearl) (SCEP)\t危疾\tN\t0%\t0%\t0%\t\t" + SC_REMARK + "\t現有產品\t2020-07\t\tY\t80",
-      "CI08\t「進添」保險計劃 – 癌症保障\tLevel-Up Protect Cancer Plan (LUP)\t危疾\tY\t10%\t0%\t0%\t\t" + LU_REMARK + "\t現有產品\t2018-11\t\tN\t\t3%/1.5%/3%\t7/11/16\t10/15/99",
-      "CI09\t「進添明珠」保險計劃 – 癌症保障\tLevel-Up Protect Pearl Cancer Plan (LUPP)\t危疾\tY\t10%\t0%\t0%\t\t" + LU_REMARK + "\t現有產品\t2018-11\t\tN\t\t3%/1.5%/3%\t7/11/16\t10/15/99",
-      "CI10\t智護癌症保\tCancer Care Essence (CCE)\t危疾\tN\t0%\t0%\t0%\t\t" + CC_REMARK + "\t現有產品\t2018-06\t\tN\t",
-      "CI11\t「多重智倍」危疾保險計劃\tSmart Elite Ultra (SEU)\t危疾\tY\t10%\t0%\t0%\t\t" + SEU_REMARK + "\t現有產品\t2017-06\t\tN\t",
-      "CI12\t「進泰安心」危疾保險計劃2\tPrime Care Pro 2 (PCP2)\t危疾\tY\t10%\t0%\t0%\t\t" + PCP_REMARK + "\t現有產品\t2016-03\t\tN\t",
-      "CI13\t「加裕倍安保」\tProtect Elevator\t危疾\tY\t10%\t0%\t0%\t\t" + PE_REMARK + "\t停售\t\t\tN\t",
-      "CI14\t「加裕倍安保（加強版）」\tProtect Elevator Plus\t危疾\tY\t10%\t0%\t0%\t\t" + PEP_REMARK + "\t停售\t\t\tN\t",
-      "CI15\t「泰然安心」危疾保險計劃2\tExecutive Care Pro 2 (ECP2)\t危疾\tY\t10%\t0%\t0%\t\t" + ECP_REMARK + "\t現有產品\t2013-08\t\tN\t",
-      "CI16\t「多重安心」危疾保險計劃2\tMultiple Care Pro 2 (MCP2)\t危疾\tY\t10%\t0%\t0%\t\t" + MCP_REMARK + "\t現有產品\t2013-08\t\tN\t",
-      "SH01\tAIA 唯一摯保 – 全面保障\tAOAFP\t嚴重程度健康保障\tN\t0%\t0%\t0%\t\t" + AO_REMARK + "\t現有產品\t2021-01\t\tY\t85",
-      "SH02\tAIA 唯一摯保明珠 – 全面保障\tAOAPFP\t嚴重程度健康保障\tN\t0%\t0%\t0%\t\t" + AO_REMARK + "\t現有產品\t2021-01\t\tY\t85",
-      "SH03\tAIA 唯一摯保 – 癌症及嚴重傳染病保障\tAOACS\t嚴重程度健康保障\tN\t0%\t0%\t0%\t\t" + AO_REMARK + "\t現有產品\t2020-05\t\tY\t85",
-      "SH04\tAIA 唯一摯保明珠 – 癌症及嚴重傳染病保障\tAOAPCS\t嚴重程度健康保障\tN\t0%\t0%\t0%\t\t" + AO_REMARK + "\t現有產品\t2020-05\t\tY\t85"
-    ].join("\n");
-
-    const UL_TAIL = "\t2.5%\t2.5%\t2.5%\t2.5%\t2.5%\t4.75%";
-    const FS_TAIL = "\t17%\t5%\t5%\t5%\t5%\t5%\t5%\t5%\t5%\t1.5%\t1.5%\t1.5%\t1.5%\t1.5%\t3%";
-    const SW_TAIL = "\t17%\t7.5%\t5%\t5%\t5%\t5%\t5%\t5%\t5%\t1.5%\t1.5%\t1.5%\t1.5%\t1.5%\t3%";
-    const HJ_TAIL = "\t10%\t6.5%\t6.5%\t6.5%\t6.5%\t10%";
-    const VS_TAIL = "\t7.5%\t7.5%\t7.5%\t7.5%\t7.5%\t10%";
-    const MT_TAIL = "\t18%\t15%\t15%\t15%\t15%\t15%\t15%\t15%\t15%\t10%";
-    const GP10_TAIL = "\t10%\t3%\t3%\t3%\t3%";
-    const P5_TAIL = "\t5%\t2%\t2%\t2%";
-    const FL6_TAIL = "\t4%\t2%\t2%\t2%\t2%";
-    function ulRows(code) {
-      return [
-        code + "\t靈活供款\t18\t64\t54%" + UL_TAIL,
-        code + "\t靈活供款\t65\t69\t48%" + UL_TAIL,
-        code + "\t靈活供款\t70\t75\t41%" + UL_TAIL
-      ];
-    }
-    function fsRows(code, maxAge) {
-      const o = [code + "\t每年續保\t0\t65\t46%" + FS_TAIL];
-      for (let a = 66; a <= maxAge; a++) o.push(code + "\t每年續保\t" + a + "\t" + a + "\t" + (46 - 2 * (a - 65)) + "%" + FS_TAIL);
-      return o;
-    }
-    function stepRows(code, y1, tail) {
-      const o = [code + "\t每年續保\t0\t65\t" + y1 + "%" + tail];
-      for (let a = 66; a <= 77; a++) o.push(code + "\t每年續保\t" + a + "\t" + a + "\t" + (y1 - (a - 65)) + "%" + tail);
-      o.push(code + "\t每年續保\t78\t80\t" + (y1 - 13) + "%" + tail);
-      return o;
-    }
-    function sgRows(code) {
-      const t = "與保障期相同";
-      const o = [code + "\t" + t + "\t0\t65\t26%" + VS_TAIL];
-      for (let a = 66; a <= 70; a++) o.push(code + "\t" + t + "\t" + a + "\t" + a + "\t" + (91 - a) + "%" + VS_TAIL);
-      return o;
-    }
-    function flexRows(code, single, lastFull, maxAge) {
-      const term = single ? "整付" : "5";
-      const tail = single ? "" : P5_TAIL;
-      const rate = k => single ? (35 - k) / 10 : 25 - k;
-      const o = [code + "\t" + term + "\t0\t" + lastFull + "\t" + rate(0) + "%" + tail];
-      for (let k = 1; k <= 4; k++) o.push(code + "\t" + term + "\t" + (lastFull + k) + "\t" + (lastFull + k) + "\t" + rate(k) + "%" + tail);
-      o.push(code + "\t" + term + "\t" + (lastFull + 5) + "\t" + maxAge + "\t" + rate(5) + "%" + tail);
-      return o;
-    }
-    function declRows(code, term, y1, step, lastFull, lastStep, maxAge, tail) {
-      const rate = a => Math.round((y1 - step * (a - lastFull)) * 100) / 100;
-      const o = [code + "\t" + term + "\t0\t" + lastFull + "\t" + y1 + "%" + tail];
-      for (let a = lastFull + 1; a < lastStep; a++) o.push(code + "\t" + term + "\t" + a + "\t" + a + "\t" + rate(a) + "%" + tail);
-      o.push(code + "\t" + term + "\t" + lastStep + "\t" + maxAge + "\t" + rate(lastStep) + "%" + tail);
-      return o;
-    }
-    function wgRows(code) {
-      const o = [code + "\t整付\t0\t65\t3%"];
-      for (let a = 66; a <= 74; a++) o.push(code + "\t整付\t" + a + "\t" + a + "\t" + (30 - (a - 65)) / 10 + "%");
-      o.push(code + "\t整付\t75\t80\t2%");
-      return o;
-    }
-    function gp3Rows(code) {
-      const o = [code + "\t3\t0\t65\t11%"];
-      for (let k = 1; k <= 4; k++) o.push(code + "\t3\t" + (65 + k) + "\t" + (65 + k) + "\t" + (110 - 3 * k) / 10 + "%");
-      o.push(code + "\t3\t70\t75\t9.5%");
-      return o;
-    }
-    function gp10Rows(code) {
-      const o = [code + "\t10\t0\t65\t35%" + GP10_TAIL];
-      for (let a = 66; a <= 70; a++) o.push(code + "\t10\t" + a + "\t" + a + "\t" + (35 - (a - 65)) + "%" + GP10_TAIL);
-      return o;
-    }
-    function slRows(code) {
-      return [
-        code + "\t5\t0\t75\t15%\t3%\t3%\t3%\t3%",
-        code + "\t10\t0\t70\t29%\t5%\t3%\t3%\t3%\t3%",
-        code + "\t25\t0\t55\t54%\t15%\t3%\t3%\t3%\t3%"
-      ];
-    }
-    function rep(v, k) {
-      let s = "";
-      for (let i = 0; i < k; i++) s += "\t" + v + "%";
-      return s;
-    }
-    function oysRows(code, min, max10, max18, max25) {
-      return [
-        code + "\t10\t" + min + "\t" + max10 + "\t30%\t5%" + rep(3, 4),
-        code + "\t18\t" + min + "\t" + max18 + "\t50%" + GP10_TAIL,
-        code + "\t25\t" + min + "\t" + max25 + "\t54%\t15%" + rep(3, 4)
-      ];
-    }
-    function tiered(code, min, max, y1, y2, y36, y710, y11) {
-      return code + "\t每年續保\t" + min + "\t" + max + "\t" + y1 + "%\t" + y2 + "%" + rep(y36, 4) + rep(y710, 4) + "\t" + y11 + "%";
-    }
-    function opRows(code) {
-      return [
-        tiered(code, 0, 65, 25, 20, 15, 15, 10),
-        tiered(code, 66, 70, 20, 15, 10, 10, 10)
-      ];
-    }
-    function puRows(code) {
-      return opRows(code).concat([
-        tiered(code, 71, 75, 16, 8, 8, 8, 8),
-        tiered(code, 76, 80, 13, 8, 5, 5, 5)
-      ]);
-    }
-    // 進添癌症保障：18 年、25 年及「至65歲」（按投保年齡逐歲列出）
-    function lupRows(code) {
-      const t = "至65歲";
-      const byAge = [[46, 52, 10], [47, 50, 10], [48, 46, 10], [49, 42, 10], [50, 39, 10],
-        [51, 37, 9], [52, 35, 8], [53, 33, 7], [54, 31, 6], [55, 29, 5]];
-      const o = [
-        code + "\t18\t0\t65\t50%\t10%" + rep(3, 4),
-        code + "\t25\t0\t55\t54%\t15%" + rep(3, 4),
-        code + "\t" + t + "\t0\t45\t54%\t15%" + rep(3, 4)
-      ];
-      byAge.forEach(x => o.push(code + "\t" + t + "\t" + x[0] + "\t" + x[0] + "\t" + x[1] + "%\t" + x[2] + "%" + rep(3, 4)));
-      return o;
-    }
-    // 多重智倍 (SEU)、進泰安心 2 (PCP2)、加裕倍安保及加強版：10／18／25 年繳
-    function ciRows(code) {
-      return [
-        code + "\t10\t0\t65\t29%\t5%" + rep(3, 4),
-        code + "\t18\t0\t62\t50%" + GP10_TAIL,
-        code + "\t25\t0\t55\t54%\t15%" + rep(3, 4)
-      ];
-    }
-    // 泰然安心 2 (ECP2)、多重安心 2 (MCP2)：5／10／15／18／25 年繳
-    function ecpRows(code) {
-      return [
-        code + "\t5\t0\t65\t20%\t3%" + rep(3, 3),
-        code + "\t10\t0\t65\t29%\t5%" + rep(3, 4),
-        code + "\t15\t0\t65\t39%" + GP10_TAIL,
-        code + "\t18\t0\t62\t50%" + GP10_TAIL,
-        code + "\t25\t0\t55\t54%\t15%" + rep(3, 4)
-      ];
-    }
-    // AIA 唯一摯保系列：每年續保及每 5 年續保，第 3 年起 5% 持續
-    function aoRows(code) {
-      return [
-        code + "\t每年續保\t0\t65\t30%\t10%\t5%",
-        code + "\t每5年續保\t0\t65\t46%\t17%\t5%"
-      ];
-    }
-    const DEF_R = [
-      "ILP01\t定期\t0\t99\t12%\t2.4%\t2.4%\t2.4%\t2.4%\t2.4%",
-      "ILP02\t整付\t0\t99\t3.22%",
-      "ILP03\t整付\t0\t99\t2.8%",
-      "ILP04\t整付\t0\t99\t1%",
-      "PA01\t每年續保\t0\t65\t40.5%\t18%\t30%",
-      "PA01\t每年續保\t66\t66\t38.5%\t18%\t30%",
-      "PA01\t每年續保\t67\t67\t36.5%\t18%\t30%",
-      "PA01\t每年續保\t68\t68\t34.5%\t18%\t30%",
-      "PA01\t每年續保\t69\t69\t32.5%\t18%\t30%",
-      "PA01\t每年續保\t70\t70\t30.5%\t18%\t30%",
-      "PA02\t每年續保\t0\t99\t40.5%\t18%\t18%\t18%\t18%\t18%\t20%",
-      "PA03\t每年續保\t0\t99\t40.5%\t18%\t18%\t18%\t18%\t18%\t20%",
-      "PA04\t一次性繳付\t0\t99\t20%",
-      "PA05\t每年續保\t18\t65\t40.5%\t18%\t30%",
-      "PA06\t每年續保\t2\t17\t37.8%\t14%\t30%",
-      "PA07\t每年續保\t50\t70\t40.5%\t18%\t30%",
-      "PA08\t12\t0\t63\t46%\t18%\t5%\t5%\t5%\t5%",
-      "PA09\t8\t0\t55\t10%\t2%\t2%\t2%\t2%\t2%",
-      "PA10\t12\t0\t63\t46%\t18%\t5%\t5%\t5%\t5%"
-    ].concat(
-      ulRows("UL01"), ulRows("UL02"), ulRows("UL03"), ulRows("UL04"),
-      fsRows("MD01", 75), stepRows("MD02", 30, SW_TAIL), stepRows("MD03", 30, SW_TAIL),
-      opRows("MD04"), ["MD05\t一次性繳付\t18\t45\t10%"],
-      opRows("MD06"), ["MD07\t一次性繳付\t18\t45\t10%"],
-      puRows("MD08"), ["MD09\t每年續保\t0\t75\t15%\t10%"], puRows("MD10"),
-      fsRows("MD11", 70), fsRows("MD12", 70),
-      stepRows("MD13", 26, HJ_TAIL), stepRows("MD14", 26, VS_TAIL), stepRows("MD15", 26, VS_TAIL),
-      opRows("MD16"), opRows("MD17"),
-      ["MD18\t至85歲\t40\t60\t26%" + MT_TAIL, "MD19\t至85歲\t40\t60\t26%" + MT_TAIL],
-      ["MD20\t10\t5\t60\t15%\t2%\t2%\t2%\t2%\t2%"],
-      sgRows("MD21"),
-      ["SV01\t整付\t40\t70\t3.2%", "SV01\t整付\t71\t75\t3%", "SV02\t整付\t0\t75\t4%"],
-      flexRows("SV03", true, 69, 85), flexRows("SV04", false, 69, 80),
-      ["SV05\t5\t0\t75\t25%\t5%\t2%\t2%\t2%", "SV05\t30\t0\t55\t54%\t18%\t3%\t3%\t3%\t3%"],
-      flexRows("SV06", true, 65, 80), flexRows("SV07", false, 65, 75),
-      wgRows("SV08"),
-      ["SV09\t5\t18\t70\t15%\t1%\t1%\t1%\t1%"],
-      flexRows("SV10", true, 65, 80),
-      gp3Rows("SV11"), flexRows("SV11", false, 65, 75), gp10Rows("SV11"),
-      wgRows("SV12"),
-      declRows("SV13", "整付", 3.5, 0.2, 65, 70, 70, ""),
-      slRows("SV14"), slRows("SV15"),
-      declRows("SV16", "整付", 3.5, 0.1, 65, 75, 80, ""),
-      declRows("SV17", "5", 25, 1, 65, 75, 80, P5_TAIL),
-      declRows("SV17", "10", 35, 1.5, 65, 75, 75, GP10_TAIL),
-      declRows("SV18", "6", 25, 1, 60, 65, 65, FL6_TAIL),
-      [
-        "SV18\t10\t0\t60\t30%\t4%\t2%\t2%\t2%\t2%",
-        "SV18\t15\t0\t55\t40%\t8%\t3%\t3%\t3%\t3%",
-        "SV18\t20\t0\t55\t50%\t10%\t3%\t3%\t3%\t3%",
-        "SV19\t5\t18\t65\t25%" + P5_TAIL,
-        "SV19\t12\t18\t65\t40%" + GP10_TAIL,
-        "SV19\t18\t18\t60\t45%\t13%\t3%\t3%\t3%\t3%",
-        "SV20\t整付\t0\t75\t3.5%",
-        "SV21\t5\t0\t65\t25%" + P5_TAIL,
-        "SV21\t10\t0\t60\t35%" + GP10_TAIL,
-        "SV21\t18\t0\t60\t50%" + GP10_TAIL,
-        "SV21\t25\t0\t55\t54%\t15%\t3%\t3%\t3%\t3%"
-      ],
-      declRows("SV22", "整付", 2.97, 0.1, 65, 80, 80, ""),
-      declRows("SV23", "3", 8, 0.2, 65, 80, 80, "\t1%\t1%"),
-      declRows("SV23", "5", 13, 0.5, 65, 80, 80, "\t1%\t1%\t1%\t1%"),
-      [
-        "SV24\t3\t0\t67\t8%\t1%\t1%",
-        "SV24\t7\t0\t65\t14%" + rep(1, 5),
-        "SV24\t12\t0\t60\t34%" + rep(1, 5),
-        "SV25\t3\t0\t60\t10%\t1%\t1%",
-        "SV25\t5\t0\t60\t15%" + rep(1, 4),
-        "SV25\t8\t0\t60\t18%" + rep(2, 5),
-        "SV25\t12\t0\t60\t23.5%" + rep(2, 5),
-        "SV25\t18\t0\t60\t36%" + rep(3, 5)
-      ],
-      oysRows("CI01", 0, 65, 62, 55),
-      oysRows("CI02", 0, 65, 62, 55),
-      oysRows("CI03", 18, 45, 45, 45),
-      [
-        "CI04\t10\t0\t65\t29%\t5%" + rep(3, 4),
-        "CI04\t18\t0\t62\t50%" + GP10_TAIL,
-        "CI04\t25\t0\t55\t54%\t15%" + rep(3, 4),
-        "CI04\t30\t0\t50\t54%\t27%" + rep(3, 4),
-        "CI05\t每年續保\t18\t65\t30%\t10%\t5%",
-        "CI06\t至80歲\t0\t65\t46%\t17%\t5%",
-        "CI07\t至80歲\t0\t65\t46%\t17%\t5%"
-      ],
-      lupRows("CI08"), lupRows("CI09"),
-      ["CI10\t每年續保\t18\t60\t22.95%\t8.5%" + rep(10, 4)],
-      ciRows("CI11"), ciRows("CI12"), ciRows("CI13"), ciRows("CI14"),
-      ecpRows("CI15"), ecpRows("CI16"),
-      aoRows("SH01"), aoRows("SH02"), aoRows("SH03"), aoRows("SH04")
-    ).join("\n");
-    const KEY_P = "comm_products_v29", KEY_R = "comm_rates_v29";
-
+    const HAS_DEF = typeof DEF_P !== "undefined" && typeof DEF_R !== "undefined";
+    const KEY_P = "comm_products_v34", KEY_R = "comm_rates_v34", KEY_LANG = "comm_lang", KEY_FXURL = "comm_fx_url", KEY_CUR = "comm_cur";
     const $ = id => document.getElementById(id);
     const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
     const num = s => parseFloat(String(s == null ? "" : s).replace(/[%,\s]/g, "")) || 0;
-    const money = n => n.toLocaleString("zh-HK", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const money = n => n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const pct = n => parseFloat(n.toFixed(4)) + "%";
     const isNum = s => /^\d+(\.\d+)?$/.test(s);
-    const isPayTo = t => /^至/.test(t || "");
-    // 繳付年期寫成「至 X 歲」時，取出 X；否則為 0
-    const termLimit = t => { const m = /^至\s*(\d+)\s*歲/.exec(t || ""); return m ? Number(m[1]) : 0; };
-    const termLabel = t => isNum(t) ? t + " 年" : t;
+    const isPayTo = s => /^至/.test(s || "");
+    const termLimit = s => { const m = /^至\s*(\d+)\s*歲/.exec(s || ""); return m ? Number(m[1]) : 0; };
     const cleanDate = s => (!s || /^[-–—]+$/.test(s)) ? "" : s;
     const rangeLabel = r => r.min === r.max ? String(r.min) : r.min + "–" + r.max;
-    const statusTag = p => '<span class="tag ' + (p.off ? "off" : "on") + '">' + (p.off ? "停售" : "現有產品") + "</span>";
-    // 公積金：可分多段；結束年度 99 或以上代表直至保費繳付期完結
+    const store = {
+      get(k, d) { try { return localStorage.getItem(k) || d; } catch (e) { return d; } },
+      set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+    };
+
+    /* ===== 語言 ===== */
+    let lang = store.get(KEY_LANG, "tc");
+    let s2c = null;
+    function initConv() { try { if (!s2c && window.OpenCC) s2c = window.OpenCC.Converter({ from: "hk", to: "cn" }); } catch (e) {} }
+    const tx = s => (lang === "sc" && s2c) ? s2c(String(s)) : s;
+    const ZH = {
+      title: "佣金計算器",
+      sub: "按產品、繳付年期及投保年齡，計算首年佣金、續保佣金及公積金，並可按公司匯率換算佣金貨幣",
+      tabCalc: "計算佣金", tabData: "佣金資料管理", hPolicy: "保單資料", hResult: "佣金結果",
+      lProduct: "選擇產品", stAll: "全部", stOn: "在售", stOff: "停售", catAll: "全部類別",
+      search: "搜尋產品名稱或代碼", change: "更改產品", noMatch: "沒有符合的產品，請更改篩選條件。",
+      noData: "未載入產品資料：請把 data.js 放在與本頁相同的資料夾，或到「佣金資料管理」貼上產品主檔和佣金率表，再按「更新資料」。",
+      lTerm: "繳付年期", termPh: "請選擇繳付年期", termNone: "請先選擇產品",
+      lAge: "投保年齡", ageHint: "投保時的實際年齡", agePh: "例如 35", premPh: "例如 10000",
+      premAnnual: "年繳保費", premSingle: "整付保費", premOnce: "保費", premTarget: "每年目標保費",
+      premHintM: "月繳保單請輸入全年合計（月繳保費 × 12）", premHintT: "目標保費可於建議書找到",
+      lExcess: "每年超額保費（如有）", excessHint: "超額保費 = 設定保費 − 目標保費",
+      lYears: "計算年數", yearsHint: "最後一個佣金率適用於其後年度",
+      lTopup: "額外整付保費（如有）", lAv: "預計戶口價值（選填）", avHint: "用來估算 Trailer Fee",
+      lPolCur: "保單貨幣", lPayCur: "佣金顯示貨幣",
+      fxSettings: "匯率設定", fxUrl: "匯率檔網址（匯率網站的 rates.json）",
+      fxUrlHint: "貼上匯率網站 rates.json 的完整網址，再按「重新載入匯率」。如果本頁與匯率網站放在同一資料夾，會自動讀取，不用填。讀取失敗時使用內置匯率。",
+      fxReload: "重新載入匯率", fxManual: "手動輸入匯率（1 外幣兌港元）",
+      fxNote: "匯率為友邦香港公佈的外幣兌港元匯率；佣金實際入賬匯率或有不同，換算結果僅供參考。",
+      fxStatus: (d, s) => "匯率日期：" + d + "（" + s + "）",
+      srcAuto: "自動更新", srcBuiltin: "內置", srcManual: "手動輸入",
+      fxOld: "匯率日期不是今天，請核對。", fxManualWarn: "正在使用手動輸入的匯率，請核對。",
+      fxCross: "（經港元交叉計算）",
+      gTitle: "開始計算", gIntro: "請依次完成以下步驟，結果會即時顯示：",
+      g1: "選擇產品（可按在售／停售、類別篩選，或直接搜尋）", g2: "選擇繳付年期", g3: "輸入投保年齡", g4: "輸入保費金額",
+      g5: "選填：選擇保單貨幣及佣金顯示貨幣，可把佣金換算成其他貨幣。",
+      on: "在售", off: "停售",
+      offWarn: s => "此產品已" + (s ? "於 " + s + " " : "") + "停售，以下佣金只供參考或核對舊保單之用。",
+      noRate: a => "找不到符合這個產品、繳付年期和年齡的佣金率。" + (a ? "可投保的年齡段：" + a + " 歲。" : ""),
+      emptyRow: "這一行資料沒有佣金率，請到「佣金資料管理」檢查。",
+      multi: n => "有 " + n + " 行資料同時符合，現用第一行計算，請檢查年齡段是否重疊。",
+      capped: (payTo, l, a, m) => (payTo ? "此產品的保費繳付至 " + l + " 歲，" : "此產品只可續保至 " + l + " 歲生日前一個保障週年日，") + a + " 歲投保最多繳付 " + m + " 年保費，計算年數已調整為 " + m + " 年。",
+      first: "首年佣金", renew: "續保佣金合計", excPart: "其中超額保費佣金", topupC: "額外整付保費佣金",
+      total: (on, n) => on ? "首 " + n + " 年佣金總額" : "佣金總額",
+      excl: a => "（不含 " + a.join("及") + "）", pf: "公積金",
+      thItem: "項目", thRate: "佣金率", thRateT: "目標保費佣金率", thBase: "基本佣金", thBaseT: "目標保費佣金",
+      thExc: r => "超額保費佣金（" + r + "）", thExtra: "額外佣金", thSum: "合計", thConv: c => "折合 " + c,
+      yr: (n, f) => "第 " + n + " 年" + (f ? "（首年）" : "（續保）"), ageSfx: a => "｜" + a + " 歲", topupRow: "額外整付保費",
+      band: r => "適用年齡段：" + r + " 歲。", payTerm: n => "保費繳付期 " + n + " 年。",
+      assume: "續保佣金假設每年保費不變，而且保單持續生效。",
+      excAssume: "超額保費佣金假設每年超額保費相同；保額層增加後的佣金未計算。",
+      lastRate: (n, r) => "第 " + n + " 年的佣金率（" + r + "）適用於其後所有年度。",
+      limitNote: (payTo, l, a, m) => (payTo ? "保費繳付至 " : "續保年齡上限 ") + l + " 歲，" + a + " 歲投保最多繳付 " + m + " 年保費。",
+      pfHead: l => "<b>公積金</b>：" + l + "，不計入上面的佣金總額。",
+      pfLine: (a, b, r, y, n, s) => "第 " + a + (b > a ? "–" + b : "") + " 年：保費的 " + r + "，每年 <b>" + y + "</b>，共 " + n + " 年 <b>" + s + "</b>",
+      pfNa: (ty, r) => ty + "（" + r + "）：超出保費繳付期，不適用",
+      pfTotal: (p, s) => "按保費 " + p + " 估算，公積金合計 <b>" + s + "</b>。",
+      pfTailTerm: n => "保費繳付期 " + n + " 年，公積金只計算至繳付期完結；",
+      pfTailTo: (l, a, n) => "保費繳付至 " + l + " 歲，" + a + " 歲投保共繳付 " + n + " 年，公積金只計算至繳付期完結；",
+      pfTailNone: "假設該年度仍然繳付保費；", pfTailEnd: "假設每年保費不變，而且保單持續生效。",
+      trHead: (s, r) => "<b>Trailer Fee</b>：由第 " + s + " 個保單年度起，每月派發戶口價值 × " + r + " ÷ 12，保單必須仍然生效。",
+      trEst: (v, m, y) => "按戶口價值 " + v + " 估算：每月約 <b>" + m + "</b>，每年約 <b>" + y + "</b>。",
+      trHint: "輸入「預計戶口價值」可估算金額。",
+      tagSpecial: r => "指定產品：首年佣金額外 " + r, tagExcess: r => "超額保費 " + r + "（所有年度）", tagTopup: r => "額外整付保費 " + r,
+      tagTrailer: r => "Trailer Fee " + r + "／年", tagPf: l => "公積金 " + l, tagOngoing: "續保佣金持續派發",
+      tagPayTo: l => "保費繳付至 " + l + " 歲", tagRenewTo: l => "續保至 " + l + " 歲生日前一個保障週年日",
+      dLaunch: "推出日期", dStop: "停售日期", dAge: "投保年齡", ageUnit: " 歲",
+      remarkTitle: n => "備註及計算假設（" + n + " 項）", remarkEn: "",
+      tyRange: (a, b) => a === b ? "第 " + a + " 年" : "第 " + a + "–" + b + " 年", tyOpen: a => "第 " + a + " 年起",
+      nYear: n => n + " 年", sepList: "、",
+      hChecks: "資料檢查", hList: "產品一覽", hMaster: "產品主檔", hRates: "佣金率表", save: "更新資料", reset: "還原預設資料",
+      saved: "資料已更新，請查看上方的資料檢查結果。", resetDone: "已還原預設資料。", dataEnNote: "",
+      okMsg: (n, g, a, b, r) => "沒有發現問題：共 " + n + " 個產品代碼，合併顯示為 " + g + " 個產品（在售 " + a + "、停售 " + b + "），" + r + " 行佣金率。",
+      masterHint1: "欄位次序：產品代碼、中文名稱、英文名稱、產品類別、指定產品 (Y/N)、額外佣金率、額外整付保費佣金率、Trailer Fee 年率、Trailer 起始年度、備註、產品狀況（現有產品／停售）、推出日期、停售日期、末年佣金率持續適用 (Y/N)、續保年齡上限（保費繳付至某歲的產品填該歲數；沒有則留空）、公積金率、公積金起始年度、公積金結束年度（沒有公積金則三欄留空）、超額保費佣金率（只限萬用壽險，其他留空）。可直接從 Excel 複製貼上。",
+      masterHint2: "公積金如分多段，三欄各用「/」分隔而且段數相同，例如公積金率 3%/1.5%/3%、起始年度 7/11/16、結束年度 10/15/99；結束年度填 99 代表直至保費繳付期完結。同一類別內，名稱只相差結尾「（整付保費）」「（5 年繳）」「（定期保費）」等繳付方式的代碼，計算頁會自動合併成一個產品，再在「繳付年期」分開選擇。",
+      ratesHint: "欄位次序：產品代碼、繳付年期（數字或「整付」「每年續保」「至85歲」「與保障期相同」等文字）、年齡下限、年齡上限、第1年、第2年……（年度數目不限）。其後的生效日期和備註會自動忽略。繳付年期寫成「至 X 歲」時，網站會自動按 X − 投保年齡計算繳付年數。",
+      listHead: ["代碼", "中文名稱", "英文名稱", "類別", "產品狀況", "推出日期", "停售日期", "繳付年期", "投保年齡", "續保／繳費年齡上限", "額外10%", "超額保費", "額外整付", "Trailer Fee", "公積金", "末年佣金率持續"],
+      trFrom: n => "（第" + n + "年起）",
+      footer: "資料只儲存在這部裝置的瀏覽器內；佣金結果按所輸入的佣金率表估算，正式數字以公司文件為準。"
+    };
+    const EN = {
+      title: "Commission Calculator",
+      sub: "Estimate first-year commission, renewal commission and provident fund by product, payment term and issue age, with currency conversion at the company rate",
+      tabCalc: "Calculator", tabData: "Commission data", hPolicy: "Policy details", hResult: "Commission result",
+      lProduct: "Select product", stAll: "All", stOn: "On sale", stOff: "Discontinued", catAll: "All categories",
+      search: "Search product name or code", change: "Change", noMatch: "No matching product. Please change the filters.",
+      noData: "No product data loaded. Put data.js in the same folder as this page, or paste the product master and rate table in the Commission data tab and press Update data.",
+      lTerm: "Premium payment term", termPh: "Select a payment term", termNone: "Select a product first",
+      lAge: "Issue age", ageHint: "Actual age at issue", agePh: "e.g. 35", premPh: "e.g. 10000",
+      premAnnual: "Annual premium", premSingle: "Single premium", premOnce: "Premium", premTarget: "Annual target premium",
+      premHintM: "For monthly mode, enter the full-year total (monthly premium × 12)", premHintT: "Target premium is shown in the proposal",
+      lExcess: "Annual excess premium (if any)", excessHint: "Excess premium = planned premium − target premium",
+      lYears: "Years to calculate", yearsHint: "The last rate applies to all later years",
+      lTopup: "Lump-sum top-up (if any)", lAv: "Projected account value (optional)", avHint: "Used to estimate Trailer Fee",
+      lPolCur: "Policy currency", lPayCur: "Show commission in",
+      fxSettings: "Exchange rate settings", fxUrl: "Rate file URL (rates.json of your FX site)",
+      fxUrlHint: "Paste the full URL of rates.json from your FX site and press Reload rates. If this page sits in the same folder as the FX site, it is read automatically. Built-in rates are used if loading fails.",
+      fxReload: "Reload rates", fxManual: "Manual rates (1 unit to HKD)",
+      fxNote: "Rates are AIA Hong Kong published rates against HKD. The rate actually applied to commission may differ; conversions are for reference only.",
+      fxStatus: (d, s) => "Rate date: " + d + " (" + s + ")",
+      srcAuto: "auto-updated", srcBuiltin: "built-in", srcManual: "manual",
+      fxOld: "Rate date is not today. Please verify.", fxManualWarn: "Using manually entered rates. Please verify.",
+      fxCross: " (cross rate via HKD)",
+      gTitle: "Get started", gIntro: "Complete the steps below. The result appears instantly:",
+      g1: "Select a product (filter by status or category, or search)", g2: "Select the premium payment term", g3: "Enter the issue age", g4: "Enter the premium amount",
+      g5: "Optional: choose the policy currency and display currency to convert the commission.",
+      on: "On sale", off: "Discontinued",
+      offWarn: s => "This product was discontinued" + (s ? " in " + s : "") + ". Figures are for reference or for checking old policies only.",
+      noRate: a => "No commission rate matches this product, payment term and age." + (a ? " Eligible issue ages: " + a + "." : ""),
+      emptyRow: "This data row has no commission rate. Please check the Commission data tab.",
+      multi: n => n + " rows match; the first is used. Please check for overlapping age bands.",
+      capped: (payTo, l, a, m) => (payTo ? "Premiums are payable to age " + l + ". " : "Renewable only up to the anniversary before age " + l + ". ") + "At issue age " + a + ", at most " + m + " annual premiums are paid, so the calculation is limited to " + m + " years.",
+      first: "First-year commission", renew: "Renewal commission total", excPart: "Of which: excess premium", topupC: "Top-up commission",
+      total: (on, n) => on ? "Total commission, first " + n + " years" : "Total commission",
+      excl: a => " (excl. " + a.join(" & ") + ")", pf: "Provident fund",
+      thItem: "Item", thRate: "Rate", thRateT: "Target premium rate", thBase: "Basic commission", thBaseT: "Target premium commission",
+      thExc: r => "Excess premium commission (" + r + ")", thExtra: "Extra commission", thSum: "Total", thConv: c => "In " + c,
+      yr: (n, f) => "Year " + n + (f ? " (first year)" : " (renewal)"), ageSfx: a => " | age " + a, topupRow: "Lump-sum top-up",
+      band: r => "Age band applied: " + r + ". ", payTerm: n => "Premium payment term: " + n + " years. ",
+      assume: "Renewal commission assumes a level premium and that the policy stays in force. ",
+      excAssume: "Excess premium is assumed to be the same every year; commission on coverage-layer increases is not calculated. ",
+      lastRate: (n, r) => "The year-" + n + " rate (" + r + ") applies to all later years. ",
+      limitNote: (payTo, l, a, m) => (payTo ? "Premiums payable to age " : "Renewal age limit ") + l + "; at issue age " + a + ", at most " + m + " annual premiums. ",
+      pfHead: l => "<b>Provident fund</b>: " + l + ". Not included in the total above.",
+      pfLine: (a, b, r, y, n, s) => "Year " + a + (b > a ? "–" + b : "") + ": " + r + " of premium, <b>" + y + "</b> a year, " + n + " years = <b>" + s + "</b>",
+      pfNa: (ty, r) => ty + " (" + r + "): beyond the premium payment term, not applicable",
+      pfTotal: (p, s) => "Based on a premium of " + p + ", provident fund total <b>" + s + "</b>.",
+      pfTailTerm: n => "Premium payment term " + n + " years; provident fund is counted only until premiums end. ",
+      pfTailTo: (l, a, n) => "Premiums payable to age " + l + " (" + n + " years from issue age " + a + "); provident fund is counted only until premiums end. ",
+      pfTailNone: "Assumes premiums are still being paid in those years. ", pfTailEnd: "Assumes a level premium and that the policy stays in force.",
+      trHead: (s, r) => "<b>Trailer Fee</b>: from policy year " + s + ", account value × " + r + " ÷ 12 is paid monthly while the policy is in force.",
+      trEst: (v, m, y) => "Based on an account value of " + v + ": about <b>" + m + "</b> a month, <b>" + y + "</b> a year.",
+      trHint: "Enter a projected account value to estimate the amount.",
+      tagSpecial: r => "Designated product: extra " + r + " on FYC", tagExcess: r => "Excess premium " + r + " (all years)", tagTopup: r => "Top-up " + r,
+      tagTrailer: r => "Trailer Fee " + r + " p.a.", tagPf: l => "Provident fund " + l, tagOngoing: "Renewal commission continues",
+      tagPayTo: l => "Premiums payable to age " + l, tagRenewTo: l => "Renewable to the anniversary before age " + l,
+      dLaunch: "Launched", dStop: "Discontinued", dAge: "Issue age", ageUnit: "",
+      remarkTitle: n => "Notes and assumptions (" + n + ")", remarkEn: "Notes are available in Chinese only.",
+      tyRange: (a, b) => a === b ? "Yr " + a : "Yr " + a + "–" + b, tyOpen: a => "Yr " + a + "+",
+      nYear: n => n + "-year pay", sepList: ", ",
+      hChecks: "Data checks", hList: "Product list", hMaster: "Product master", hRates: "Commission rate table", save: "Update data", reset: "Restore defaults",
+      saved: "Data updated. Please review the data checks above.", resetDone: "Default data restored.",
+      dataEnNote: "Field-order instructions and data-check messages are shown in Chinese.",
+      okMsg: (n, g, a, b, r) => "No issues found: " + n + " product codes, shown as " + g + " products (" + a + " on sale, " + b + " discontinued), " + r + " rate rows.",
+      listHead: ["Code", "Chinese name", "English name", "Category", "Status", "Launched", "Discontinued", "Payment term", "Issue age", "Renewal / pay-to age", "Extra 10%", "Excess premium", "Top-up", "Trailer Fee", "Provident fund", "Last rate continues"],
+      trFrom: n => " (from yr " + n + ")",
+      footer: "Data is stored only in this device's browser. Results are estimates based on the rate table entered; official figures follow company documents."
+    };
+    function t(k) {
+      const en = lang === "en" && EN[k] !== undefined;
+      let v = en ? EN[k] : ZH[k];
+      if (typeof v === "function") v = v.apply(null, [].slice.call(arguments, 1));
+      if (en || Array.isArray(v)) return Array.isArray(v) && !en ? v.map(tx) : v;
+      return tx(v);
+    }
+    const CAT_EN = { "投資相連": "Investment-linked", "個人意外": "Personal Accident", "萬用壽險": "Universal Life", "醫療": "Medical", "終身及儲蓄壽險": "Whole Life & Savings", "危疾": "Critical Illness", "嚴重程度健康保障": "Severity-based Health" };
+    const catLabel = c => lang === "en" ? (CAT_EN[c] || c) : tx(c);
+    const TERM_EN = { "整付": "Single premium", "定期": "Regular premium", "每年續保": "Yearly renewable", "每5年續保": "5-year renewable", "一次性繳付": "One-off payment", "靈活供款": "Flexible premium", "與保障期相同": "Same as benefit term", "定期繳付": "Regular payment" };
+    function termLabel(s) {
+      if (isNum(s)) return t("nYear", s);
+      if (lang !== "en") return tx(s);
+      if (TERM_EN[s]) return TERM_EN[s];
+      let m = /^至\s*(\d+)\s*歲/.exec(s);
+      if (m) return "To age " + m[1];
+      m = /^可續保至\s*(\d+)\s*歲/.exec(s);
+      if (m) return "Renewable to age " + m[1];
+      return s;
+    }
+
+    /* ===== 匯率 ===== */
+    const CUR = [
+      { c: "HKD", n: "港元", e: "Hong Kong Dollar", s: "HK$" }, { c: "USD", n: "美元", e: "US Dollar", s: "US$" },
+      { c: "CNY", n: "人民幣", e: "Renminbi", s: "CN¥" }, { c: "MOP", n: "澳門幣", e: "Macau Pataca", s: "MOP$" },
+      { c: "GBP", n: "英鎊", e: "Pound Sterling", s: "£" }, { c: "EUR", n: "歐羅", e: "Euro", s: "€" },
+      { c: "AUD", n: "澳元", e: "Australian Dollar", s: "A$" }, { c: "NZD", n: "紐西蘭元", e: "New Zealand Dollar", s: "NZ$" },
+      { c: "CAD", n: "加拿大元", e: "Canadian Dollar", s: "C$" }, { c: "SGD", n: "新加坡元", e: "Singapore Dollar", s: "S$" },
+      { c: "CHF", n: "瑞士法郎", e: "Swiss Franc", s: "CHF" }, { c: "JPY", n: "日圓", e: "Japanese Yen", s: "JP¥" },
+      { c: "TWD", n: "新台幣", e: "New Taiwan Dollar", s: "NT$" }, { c: "PHP", n: "菲律賓披索", e: "Philippine Peso", s: "₱" }
+    ];
+    const BUILTIN = { date: "2026-11-18", rates: { USD: 7.8505, AUD: 5.2819, CNY: 1.1802, CAD: 5.484, CHF: 9.3398, GBP: 10.3468, PHP: 0.1232, MOP: 0.9709, TWD: 0.2381, SGD: 6.0866, NZD: 4.3094, EUR: 8.6277, JPY: 0.0492 } };
+    let FX = { date: BUILTIN.date, rates: Object.assign({}, BUILTIN.rates, { HKD: 1 }), source: "builtin" };
+    const sym = c => (CUR.find(x => x.c === c) || { s: c }).s;
+    const curName = x => lang === "en" ? x.e : tx(x.n);
+    const hkToday = () => new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10);
+    async function fetchRates(u) {
+      const r = await fetch(u + (u.indexOf("?") < 0 ? "?" : "&") + "t=" + Date.now(), { cache: "no-store" });
+      if (!r.ok) throw new Error("http");
+      const j = await r.json();
+      if (!(j.rates && j.rates.USD > 7 && j.rates.USD < 9)) throw new Error("bad");
+      return j;
+    }
+    async function loadFx() {
+      const urls = [store.get(KEY_FXURL, "").trim(), "rates.json"].filter(Boolean);
+      let j = null;
+      for (const u of urls) { try { j = await fetchRates(u); break; } catch (e) {} }
+      const d = j || BUILTIN;
+      FX = { date: d.date, rates: Object.assign({}, d.rates, { HKD: 1 }), source: j ? "auto" : "builtin" };
+      fillCur(); renderFx(true); calc();
+    }
+    function fxWarn() {
+      if (FX.source === "manual") return t("fxManualWarn");
+      return FX.date !== hkToday() ? t("fxOld") : "";
+    }
+    function fxStatusText() {
+      return t("fxStatus", FX.date, t(FX.source === "auto" ? "srcAuto" : FX.source === "manual" ? "srcManual" : "srcBuiltin"));
+    }
+    function renderFx(grid) {
+      const w = fxWarn();
+      $("fxStatus").textContent = fxStatusText() + (w ? "　" + w : "");
+      if (grid) $("fxGrid").innerHTML = CUR.filter(x => x.c !== "HKD").map(x =>
+        '<div><label>' + x.c + " " + esc(curName(x)) + '</label><input type="text" inputmode="decimal" data-c="' + x.c + '" value="' + (FX.rates[x.c] || "") + '"></div>').join("");
+    }
+    function fillCur() {
+      const saved = store.get(KEY_CUR, "USD|HKD").split("|");
+      const keepP = $("polCur").value || saved[0], keepQ = $("payCur").value || saved[1];
+      const opts = CUR.filter(x => FX.rates[x.c] > 0).map(x => '<option value="' + x.c + '">' + x.c + " " + esc(curName(x)) + "（" + x.s + "）</option>").join("");
+      $("polCur").innerHTML = opts; $("payCur").innerHTML = opts;
+      $("polCur").value = FX.rates[keepP] > 0 ? keepP : "USD";
+      $("payCur").value = FX.rates[keepQ] > 0 ? keepQ : "HKD";
+    }
+
+    /* ===== 資料 ===== */
     const PF_OPEN = 99;
     const splitList = s => String(s == null ? "" : s).split(/[\/／]/).map(x => x.trim()).filter(x => x !== "");
     function parsePf(a, b, c) {
       const rs = splitList(a), ss = splitList(b), es = splitList(c), o = [];
       const k = Math.max(rs.length, ss.length, es.length);
       for (let i = 0; i < k; i++) o.push({ rate: num(rs[i]), start: Math.round(num(ss[i])), end: Math.round(num(es[i])) });
-      return o.filter(t => t.rate > 0 || t.start > 0 || t.end > 0);
+      return o.filter(x => x.rate > 0 || x.start > 0 || x.end > 0);
     }
-    const pfValid = p => p.pfTiers.length > 0 && p.pfTiers.every(t => t.rate > 0 && t.start >= 1 && t.end >= t.start);
-    const tierYears = t => t.end >= PF_OPEN ? "第 " + t.start + " 年起" : (t.start === t.end ? "第 " + t.start + " 年" : "第 " + t.start + "–" + t.end + " 年");
-    const pfLabel = p => p.pfTiers.map(t => pct(t.rate) + "（" + tierYears(t) + "）").join("、");
-    const store = {
-      get(k, d) { try { return localStorage.getItem(k) || d; } catch (e) { return d; } },
-      set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
-    };
+    const pfValid = p => p.pfTiers.length > 0 && p.pfTiers.every(x => x.rate > 0 && x.start >= 1 && x.end >= x.start);
+    const tierYears = x => x.end >= PF_OPEN ? t("tyOpen", x.start) : t("tyRange", x.start, x.end);
+    const pfLabel = p => p.pfTiers.map(x => pct(x.rate) + "（" + tierYears(x) + "）").join(t("sepList"));
+    const statusTag = off => '<span class="tag ' + (off ? "off" : "on") + '">' + t(off ? "off" : "on") + "</span>";
 
-    let products = [], rates = [];
+    let products = [], rates = [], groups = [];
+    const ST = { status: "all", cat: "", g: null, open: true };
 
     function rows(text) {
       return text.split(/\r?\n/).filter(l => l.trim() !== "")
@@ -657,6 +533,35 @@
         return { code: c[0], term: c[1] || "", min: num(c[2]), max: num(c[3]), years };
       });
     }
+    // 同一類別內，名稱只相差結尾繳付方式的代碼合併顯示；計算仍按原代碼
+    const VAR_ZH = /（[^（）]*(整付保費|定期保費|年繳)[^（）]*）$/;
+    const VAR_EN = /\s*[–-]\s*(Single Premium|[\d\/]+ Pay)$|\s*\((Regular|Single) Premium\)$/;
+    function buildGroups() {
+      const map = {};
+      groups = [];
+      products.forEach(p => {
+        const base = p.zh.replace(VAR_ZH, ""), key = p.cat + "|" + base;
+        let g = map[key];
+        if (!g) { g = map[key] = { key, zh: base, en: p.en.replace(VAR_EN, ""), cat: p.cat, members: [] }; groups.push(g); }
+        g.members.push(p);
+      });
+      groups.forEach(g => {
+        if (g.members.length === 1) { g.zh = g.members[0].zh; g.en = g.members[0].en; }
+        g.off = g.members.every(m => m.off);
+        g.codes = g.members.map(m => m.code).join(" / ");
+      });
+    }
+    const curGroup = () => groups.find(x => x.key === ST.g) || null;
+    function groupTerms(g) {
+      const o = [];
+      g.members.forEach(p => {
+        [...new Set(rates.filter(r => r.code === p.code).map(r => r.term))].forEach(tm => o.push({ code: p.code, term: tm }));
+      });
+      return o.sort((a, b) => {
+        const x = isNum(a.term), y = isNum(b.term);
+        return x && y ? a.term - b.term : (x ? 1 : (y ? -1 : 0));
+      });
+    }
 
     function validate() {
       const out = [];
@@ -677,152 +582,169 @@
         .forEach(p => out.push(["err", p.code + " " + p.zh + " 的投保年齡上限不應等於或超過續保年齡上限 " + p.renewLimit]));
       rates.filter(r => termLimit(r.term) > 0 && r.max >= termLimit(r.term))
         .forEach(r => out.push(["err", r.code + "（" + r.term + "）的投保年齡上限不應等於或超過 " + termLimit(r.term) + " 歲"]));
-      products.filter(p => p.pfTiers.some(t => t.rate > 0) && !pfValid(p))
+      products.filter(p => p.pfTiers.some(x => x.rate > 0) && !pfValid(p))
         .forEach(p => out.push(["err", p.code + " " + p.zh + " 有公積金率，但起始或結束年度未填或不正確（分多段時三欄須用「/」分隔而且段數相同）"]));
-      products.filter(p => p.pfTiers.length > 0 && p.pfTiers.every(t => t.rate === 0))
+      products.filter(p => p.pfTiers.length > 0 && p.pfTiers.every(x => x.rate === 0))
         .forEach(p => out.push(["warn", p.code + " " + p.zh + " 填了公積金年度，但沒有公積金率"]));
       products.filter(pfValid).forEach(p => {
         const s = p.pfTiers.slice().sort((a, b) => a.start - b.start);
         for (let i = 1; i < s.length; i++) {
-          if (s[i].start <= s[i - 1].end) out.push(["err", p.code + " " + p.zh + " 的公積金年度重疊：" + tierYears(s[i - 1]) + " 與 " + tierYears(s[i])]);
+          if (s[i].start <= s[i - 1].end) out.push(["err", p.code + " " + p.zh + " 的公積金年度重疊（第 " + s[i - 1].start + " 年起與第 " + s[i].start + " 年起兩段）"]);
         }
       });
-      rates.filter(r => r.term === "")
-        .forEach(r => out.push(["err", r.code + " 有一行沒有填繳付年期"]));
-      rates.filter(r => r.years.length === 0)
-        .forEach(r => out.push(["err", r.code + "（" + termLabel(r.term) + "）有一行沒有佣金率"]));
-      rates.filter(r => r.min > r.max)
-        .forEach(r => out.push(["err", r.code + "（" + termLabel(r.term) + "）年齡下限大於上限"]));
+      rates.filter(r => r.term === "").forEach(r => out.push(["err", r.code + " 有一行沒有填繳付年期"]));
+      rates.filter(r => r.years.length === 0).forEach(r => out.push(["err", r.code + "（" + r.term + "）有一行沒有佣金率"]));
+      rates.filter(r => r.min > r.max).forEach(r => out.push(["err", r.code + "（" + r.term + "）年齡下限大於上限"]));
       rates.filter(r => isNum(r.term) && r.years.length > Number(r.term))
-        .forEach(r => out.push(["warn", r.code + "（" + termLabel(r.term) + "）填了 " + r.years.length + " 個年度的佣金率，多於繳付年期"]));
+        .forEach(r => out.push(["warn", r.code + "（" + r.term + " 年）填了 " + r.years.length + " 個年度的佣金率，多於繳付年期"]));
       products.filter(pfValid).forEach(p => {
-        const ends = p.pfTiers.filter(t => t.end < PF_OPEN).map(t => t.end);
+        const ends = p.pfTiers.filter(x => x.end < PF_OPEN).map(x => x.end);
         if (ends.length === 0) return;
         const pfEnd = Math.max.apply(null, ends);
-        const ts = [...new Set(rates.filter(r => r.code === p.code && isNum(r.term) && pfEnd > Number(r.term)).map(r => r.term))];
-        ts.forEach(t => out.push(["warn", p.code + "（" + termLabel(t) + "）公積金結束年度（第 " + pfEnd + " 年）超過繳付年期"]));
+        [...new Set(rates.filter(r => r.code === p.code && isNum(r.term) && pfEnd > Number(r.term)).map(r => r.term))]
+          .forEach(x => out.push(["warn", p.code + "（" + x + " 年）公積金結束年度（第 " + pfEnd + " 年）超過繳付年期"]));
       });
-      const groups = {};
-      rates.forEach(r => { const k = r.code + "|" + r.term; (groups[k] = groups[k] || []).push(r); });
-      Object.keys(groups).forEach(k => {
-        const g = groups[k].slice().sort((a, b) => a.min - b.min);
-        const parts = k.split("|");
-        const label = parts[0] + "（" + termLabel(parts[1]) + "）";
+      const gs = {};
+      rates.forEach(r => { const k = r.code + "|" + r.term; (gs[k] = gs[k] || []).push(r); });
+      Object.keys(gs).forEach(k => {
+        const g = gs[k].slice().sort((a, b) => a.min - b.min);
+        const i0 = k.indexOf("|"), label = k.slice(0, i0) + "（" + k.slice(i0 + 1) + "）";
         for (let i = 1; i < g.length; i++) {
           if (g[i].min <= g[i - 1].max) out.push(["err", label + "年齡段重疊：" + g[i - 1].min + "–" + g[i - 1].max + " 與 " + g[i].min + "–" + g[i].max]);
           else if (g[i].min > g[i - 1].max + 1) out.push(["warn", label + "年齡段有空隙：" + (g[i - 1].max + 1) + " 至 " + (g[i].min - 1) + " 歲沒有佣金率"]);
         }
       });
+      // 合併顯示的產品：繳付年期不可重複
+      groups.filter(g => g.members.length > 1).forEach(g => {
+        const ts = groupTerms(g).map(x => x.term);
+        ts.filter((x, i) => ts.indexOf(x) !== i).forEach(x => out.push(["err", g.codes + " 合併顯示為「" + g.zh + "」，但繳付年期「" + x + "」重複，請修改名稱或繳付年期"]));
+      });
       return out;
     }
-
     function renderChecks() {
+      if (products.length === 0) { $("checks").innerHTML = '<div class="msg warn">' + esc(t("noData")) + "</div>"; return; }
       const v = validate();
-      const offCount = products.filter(p => p.off).length;
+      const offG = groups.filter(g => g.off).length;
       $("checks").innerHTML = v.length
-        ? v.map(x => '<div class="msg ' + x[0] + '">' + esc(x[1]) + "</div>").join("")
-        : '<div class="msg ok">沒有發現問題：共 ' + products.length + " 個產品（現有 " + (products.length - offCount) + "、停售 " + offCount + "），" + rates.length + " 行佣金率。</div>";
+        ? v.map(x => '<div class="msg ' + x[0] + '">' + esc(tx(x[1])) + "</div>").join("")
+        : '<div class="msg ok">' + esc(t("okMsg", products.length, groups.length, groups.length - offG, offG, rates.length)) + "</div>";
     }
-
     function ageRange(code, term) {
       const rs = rates.filter(r => r.code === code && (term == null || r.term === term));
       if (rs.length === 0) return "—";
       return Math.min.apply(null, rs.map(r => r.min)) + "–" + Math.max.apply(null, rs.map(r => r.max));
     }
-    function termList(code) {
-      const ts = [...new Set(rates.filter(r => r.code === code).map(r => r.term))];
-      return ts.length ? ts.map(termLabel).join("、") : "—";
-    }
-    function limitList(p) {
-      if (p.renewLimit > 0) return String(p.renewLimit);
-      const ls = [...new Set(rates.filter(r => r.code === p.code).map(r => termLimit(r.term)).filter(x => x > 0))];
-      return ls.length ? ls.join("、") : "—";
-    }
-
     function renderList() {
-      let h = '<table><thead><tr><th>代碼</th><th class="l">中文名稱</th><th class="l">英文名稱</th><th>類別</th><th class="c">產品狀況</th><th class="c">推出日期</th><th class="c">停售日期</th><th class="c">繳付年期</th><th class="c">投保年齡</th><th class="c">續保／繳費年齡上限</th><th>額外10%</th><th>超額保費</th><th>額外整付</th><th>Trailer Fee</th><th>公積金</th><th class="c">末年佣金率持續</th></tr></thead><tbody>';
+      const H = t("listHead"), cls = ["", "l", "l", "", "c", "c", "c", "c", "c", "c", "", "", "", "", "", "c"];
+      let h = "<table><thead><tr>" + H.map((x, i) => "<th" + (cls[i] ? ' class="' + cls[i] + '"' : "") + ">" + esc(x) + "</th>").join("") + "</tr></thead><tbody>";
       products.forEach(p => {
-        h += "<tr" + (p.off ? ' class="offrow"' : "") + "><td>" + esc(p.code) + '</td><td class="l">' + esc(p.zh) + '</td><td class="l">' + esc(p.en) +
-          "</td><td>" + esc(p.cat) + '</td><td class="c">' + statusTag(p) + '</td><td class="c">' + esc(p.launch || "—") + '</td><td class="c">' + esc(p.stop || "—") +
-          '</td><td class="c">' + esc(termList(p.code)) + '</td><td class="c">' + ageRange(p.code) + '</td><td class="c">' + limitList(p) +
+        const ts = [...new Set(rates.filter(r => r.code === p.code).map(r => r.term))];
+        const ls = p.renewLimit > 0 ? [p.renewLimit] : [...new Set(ts.map(termLimit).filter(x => x > 0))];
+        h += "<tr" + (p.off ? ' class="offrow"' : "") + "><td>" + esc(p.code) + '</td><td class="l">' + esc(tx(p.zh)) + '</td><td class="l">' + esc(p.en) +
+          "</td><td>" + esc(catLabel(p.cat)) + '</td><td class="c">' + statusTag(p.off) + '</td><td class="c">' + esc(p.launch || "—") + '</td><td class="c">' + esc(p.stop || "—") +
+          '</td><td class="c">' + esc(ts.length ? ts.map(termLabel).join(t("sepList")) : "—") + '</td><td class="c">' + ageRange(p.code) + '</td><td class="c">' + (ls.length ? ls.join(t("sepList")) : "—") +
           "</td><td>" + (p.special ? pct(p.bonus) : "—") + "</td><td>" + (p.excess ? pct(p.excess) : "—") + "</td><td>" + (p.topup ? pct(p.topup) : "—") +
-          "</td><td>" + (p.trailer ? pct(p.trailer) + "（第" + p.trailerStart + "年起）" : "—") +
-          "</td><td>" + (pfValid(p) ? pfLabel(p) : "—") +
-          '</td><td class="c">' + (p.ongoing ? "Y" : "—") + "</td></tr>";
+          "</td><td>" + (p.trailer ? pct(p.trailer) + t("trFrom", p.trailerStart) : "—") +
+          "</td><td>" + (pfValid(p) ? esc(pfLabel(p)) : "—") + '</td><td class="c">' + (p.ongoing ? "Y" : "—") + "</td></tr>";
       });
       $("list").innerHTML = h + "</tbody></table>";
     }
 
-    function fillCats() {
-      const prev = $("cat").value;
-      const cats = [...new Set(products.map(p => p.cat).filter(c => c !== ""))];
-      $("cat").innerHTML = '<option value="">全部類別</option>' +
-        cats.map(c => '<option value="' + esc(c) + '">' + esc(c) + "</option>").join("");
-      if (cats.indexOf(prev) !== -1) $("cat").value = prev;
+    /* ===== 產品選擇 ===== */
+    function names(o) { const zh = tx(o.zh); return lang === "en" && o.en ? [o.en, zh] : [zh, o.en]; }
+    function nameHtml(g) {
+      const n = names(g);
+      return '<div class="pn">' + esc(n[0]) + "</div>" + (n[1] ? '<div class="pe">' + esc(n[1]) + "</div>" : "") +
+        '<div class="pm"><span class="dot' + (g.off ? " off" : "") + '"></span>' + t(g.off ? "off" : "on") + " · " + esc(catLabel(g.cat)) + " · " + esc(g.codes) + "</div>";
     }
-    function fillProducts() {
-      const prev = $("product").value, cat = $("cat").value;
-      const list = products.filter(p => ($("showOff").checked || !p.off) && (cat === "" || p.cat === cat));
-      $("product").innerHTML = list.map(p =>
-        '<option value="' + esc(p.code) + '">' + esc((p.off ? "【停售】" : "") + p.code + "｜" + p.zh + (p.en ? " " + p.en : "")) + "</option>").join("");
-      if (list.some(p => p.code === prev)) $("product").value = prev;
-      fillTerms();
+    function renderPicker() {
+      const g = curGroup();
+      document.querySelectorAll("#seg button").forEach(b => b.classList.toggle("active", b.dataset.s === ST.status));
+      const cats = [...new Set(groups.map(x => x.cat).filter(Boolean))];
+      $("chips").innerHTML = [""].concat(cats).map(c =>
+        '<button class="chip' + (c === ST.cat ? " active" : "") + '" data-c="' + esc(c) + '">' + esc(c ? catLabel(c) : t("catAll")) + "</button>").join("");
+      const show = !!g && !ST.open;
+      $("pickSel").classList.toggle("hidden", !show);
+      $("pickBody").classList.toggle("hidden", show);
+      if (show) $("pickSel").innerHTML = '<div class="psel"><div>' + nameHtml(g) + '</div><button class="btn light small" id="chg">' + esc(t("change")) + "</button></div>";
+      const q = $("q").value.trim().toLowerCase();
+      let h = "";
+      groups.forEach((x, i) => {
+        if (ST.status !== "all" && (ST.status === "off") !== x.off) return;
+        if (ST.cat && x.cat !== ST.cat) return;
+        if (q && (x.zh + " " + tx(x.zh) + " " + x.en + " " + x.codes).toLowerCase().indexOf(q) === -1) return;
+        h += '<div class="pitem' + (x.key === ST.g ? " sel" : "") + '" data-k="' + i + '">' + nameHtml(x) + "</div>";
+      });
+      $("plist").innerHTML = h || '<div class="pempty">' + esc(t(products.length ? "noMatch" : "noData")) + "</div>";
     }
-    function fillTerms() {
-      const code = $("product").value;
-      const terms = [...new Set(rates.filter(r => r.code === code).map(r => r.term))]
-        .sort((a, b) => isNum(a) && isNum(b) ? a - b : a.localeCompare(b));
-      $("term").innerHTML = terms.map(t => '<option value="' + esc(t) + '">' + esc(termLabel(t)) + "</option>").join("");
-      calc();
+    function fillTerms(keep) {
+      const g = curGroup(), sel = $("term");
+      if (!g) { sel.innerHTML = '<option value="">' + esc(t("termNone")) + "</option>"; sel.disabled = true; return; }
+      const o = groupTerms(g);
+      sel.disabled = false;
+      sel.innerHTML = (o.length !== 1 ? '<option value="">' + esc(t("termPh")) + "</option>" : "") +
+        o.map(x => '<option value="' + esc(x.code + "|" + x.term) + '">' + esc(termLabel(x.term)) + "</option>").join("");
+      if (keep && o.some(x => x.code + "|" + x.term === keep)) sel.value = keep;
     }
 
-    function renderInfo(p, term) {
-      const single = /整付/.test(term), once = /一次/.test(term);
-      const hasExcess = !!(p && p.excess > 0);
-      $("premiumLabel").textContent = hasExcess ? "每年目標保費" : (single ? "整付保費" : (once ? "保費" : "年繳保費"));
-      $("premiumHint").textContent = hasExcess ? "目標保費可於建議書找到" : ((single || once) ? "" : "月繳保單請輸入全年合計（月繳保費 × 12）");
+    /* ===== 計算 ===== */
+    function renderInfo(g, p, term) {
+      const single = /整付/.test(term), once = /一次/.test(term), hasExcess = !!(p && p.excess > 0);
+      $("premiumLabel").textContent = t(hasExcess ? "premTarget" : (single ? "premSingle" : (once ? "premOnce" : "premAnnual")));
+      $("premiumHint").textContent = hasExcess ? t("premHintT") : ((single || once || !p) ? "" : t("premHintM"));
       $("excessWrap").classList.toggle("hidden", !hasExcess);
       $("topupWrap").classList.toggle("hidden", !(p && p.topup > 0));
       $("avWrap").classList.toggle("hidden", !(p && p.trailer > 0));
       $("yearsWrap").classList.toggle("hidden", !(p && p.ongoing));
-      if (!p) { $("info").innerHTML = ""; return; }
-      const limit = termLimit(term) || p.renewLimit;
-      let tags = statusTag(p);
-      if (p.cat) tags += '<span class="tag">' + esc(p.cat) + "</span>";
-      if (p.special) tags += '<span class="tag gold">指定產品：首年佣金額外 ' + pct(p.bonus) + "</span>";
-      if (hasExcess) tags += '<span class="tag green">超額保費 ' + pct(p.excess) + "（所有年度）</span>";
-      if (p.topup > 0) tags += '<span class="tag green">額外整付保費 ' + pct(p.topup) + "</span>";
-      if (p.trailer > 0) tags += '<span class="tag blue">Trailer Fee ' + pct(p.trailer) + "／年</span>";
-      if (pfValid(p)) tags += '<span class="tag teal">公積金 ' + pfLabel(p) + "</span>";
-      if (p.ongoing) tags += '<span class="tag blue">續保佣金持續派發</span>';
-      if (limit > 0) tags += '<span class="tag purple">' + (isPayTo(term) ? "保費繳付至 " + limit + " 歲" : "續保至 " + limit + " 歲生日前一個保障週年日") + "</span>";
-      const notes = p.remark ? p.remark.split("；").filter(x => x.trim() !== "") : [];
-      $("info").innerHTML = '<div class="info' + (p.off ? " off" : "") + '"><div class="zh">' + esc(p.zh) + '</div><div class="en">' + esc(p.en) + "</div>" +
-        tags + '<div class="dates">推出日期：' + esc(p.launch || "—") + "　｜　停售日期：" + esc(p.stop || "—") + "　｜　投保年齡：" + ageRange(p.code, term) + " 歲</div>" +
-        (notes.length ? '<details class="remark"><summary>備註及計算假設（' + notes.length + " 項）</summary><ul>" +
-          notes.map(x => "<li>" + esc(x) + "</li>").join("") + "</ul></details>" : "") + "</div>";
+      if (!g) { $("info").innerHTML = ""; return; }
+      const o = p || g, n = names(o);
+      let tags = statusTag(o.off);
+      if (o.cat) tags += '<span class="tag">' + esc(catLabel(o.cat)) + "</span>";
+      let tail = "";
+      if (p) {
+        const limit = termLimit(term) || p.renewLimit;
+        if (p.special) tags += '<span class="tag gold">' + esc(t("tagSpecial", pct(p.bonus))) + "</span>";
+        if (hasExcess) tags += '<span class="tag green">' + esc(t("tagExcess", pct(p.excess))) + "</span>";
+        if (p.topup > 0) tags += '<span class="tag green">' + esc(t("tagTopup", pct(p.topup))) + "</span>";
+        if (p.trailer > 0) tags += '<span class="tag blue">' + esc(t("tagTrailer", pct(p.trailer))) + "</span>";
+        if (pfValid(p)) tags += '<span class="tag teal">' + esc(t("tagPf", pfLabel(p))) + "</span>";
+        if (p.ongoing) tags += '<span class="tag blue">' + esc(t("tagOngoing")) + "</span>";
+        if (limit > 0) tags += '<span class="tag purple">' + esc(t(isPayTo(term) ? "tagPayTo" : "tagRenewTo", limit)) + "</span>";
+        const notes = p.remark ? p.remark.split("；").filter(x => x.trim() !== "") : [];
+        tail = '<div class="dates">' + esc(p.code) + "　｜　" + t("dLaunch") + "：" + esc(p.launch || "—") + "　｜　" + t("dStop") + "：" + esc(p.stop || "—") + "　｜　" + t("dAge") + "：" + ageRange(p.code, term) + t("ageUnit") + "</div>" +
+          (notes.length ? '<details class="remark"><summary>' + esc(t("remarkTitle", notes.length)) + "</summary>" + (t("remarkEn") ? '<div class="hint">' + esc(t("remarkEn")) + "</div>" : "") + "<ul>" +
+            notes.map(x => "<li>" + esc(tx(x)) + "</li>").join("") + "</ul></details>" : "");
+      }
+      $("info").innerHTML = '<div class="info' + (o.off ? " off" : "") + '"><div class="zh">' + esc(n[0]) + '</div><div class="en">' + esc(n[1] || "") + "</div>" + tags + tail + "</div>";
     }
-
+    function guideHtml(done) {
+      const cur = done.indexOf(false);
+      return '<div class="guide"><div class="gt">' + esc(t("gTitle")) + '</div><div class="gi">' + esc(t("gIntro")) + "</div><ol>" +
+        [1, 2, 3, 4].map((n, i) => '<li class="' + (done[i] ? "done" : (i === cur ? "now" : "")) + '"><span class="gn">' + (done[i] ? "✓" : n) + "</span>" + esc(t("g" + n)) + "</li>").join("") +
+        '</ol><div class="hint">' + esc(t("g5")) + "</div></div>";
+    }
     function calc() {
-      const p = products.find(x => x.code === $("product").value);
-      const term = $("term").value, age = num($("age").value), premium = num($("premium").value);
-      renderInfo(p, term);
-      if (!p) { $("result").innerHTML = '<div class="msg err">沒有可選的產品，請更改產品類別、勾選「顯示已停售產品」，或在「佣金資料管理」加入產品。</div>'; return; }
+      const g = curGroup(), tv = $("term").value, i0 = tv.indexOf("|");
+      const code = i0 > 0 ? tv.slice(0, i0) : "", term = i0 > 0 ? tv.slice(i0 + 1) : "";
+      const p = g ? products.find(x => x.code === code) : null;
+      const ageS = $("age").value.trim(), age = num(ageS), premium = num($("premium").value);
+      renderInfo(g, p, term);
+      if (products.length === 0) { $("result").innerHTML = '<div class="msg warn">' + esc(t("noData")) + "</div>"; return; }
+      const done = [!!g, !!p, ageS !== "" && age >= 0, premium > 0];
+      if (done.indexOf(false) !== -1) { $("result").innerHTML = guideHtml(done); return; }
+
       let html = "";
-      if (p.off) html += '<div class="msg warn">此產品已' + (p.stop ? "於 " + esc(p.stop) + " " : "") + "停售，以下佣金只供參考或核對舊保單之用。</div>";
+      if (p.off) html += '<div class="msg warn">' + esc(t("offWarn", p.stop)) + "</div>";
       const m = rates.filter(r => r.code === p.code && r.term === term && age >= r.min && age <= r.max);
       if (m.length === 0) {
-        const avail = rates.filter(r => r.code === p.code && r.term === term).sort((a, b) => a.min - b.min).map(rangeLabel).join("、");
-        $("result").innerHTML = html + '<div class="msg err">找不到符合這個產品、繳付年期和年齡的佣金率。' +
-          (avail ? "此產品可投保的年齡段：" + esc(avail) + " 歲。" : "") + "</div>";
+        const avail = rates.filter(r => r.code === p.code && r.term === term).sort((a, b) => a.min - b.min).map(rangeLabel).join(t("sepList"));
+        $("result").innerHTML = html + '<div class="msg err">' + esc(t("noRate", avail)) + "</div>";
         return;
       }
       const r = m[0];
-      if (r.years.length === 0) { $("result").innerHTML = html + '<div class="msg err">這一行資料沒有佣金率，請到「佣金資料管理」檢查。</div>'; return; }
+      if (r.years.length === 0) { $("result").innerHTML = html + '<div class="msg err">' + esc(t("emptyRow")) + "</div>"; return; }
       const termNum = isNum(term) ? Number(term) : 0;
-      const hasExcess = p.excess > 0;
-      const payTo = isPayTo(term);
-      const limit = termLimit(term) || p.renewLimit;
+      const hasExcess = p.excess > 0, payTo = isPayTo(term), limit = termLimit(term) || p.renewLimit;
       let n = r.years.length;
       if (p.ongoing) n = Math.min(50, Math.max(1, Math.round(num($("nYears").value)) || r.years.length));
       let maxN = 0, capped = false;
@@ -830,115 +752,151 @@
         maxN = Math.max(1, limit - age);
         if (n > maxN) { n = maxN; capped = true; }
       }
-      const topupPrem = p.topup > 0 ? num($("topup").value) : 0;
-      const topupComm = topupPrem * p.topup / 100;
-      const excPrem = hasExcess ? num($("excess").value) : 0;
-      const exc = excPrem * p.excess / 100;
+      // 貨幣
+      const pol = $("polCur").value, pay = $("payCur").value;
+      const conv = pol !== pay && FX.rates[pol] > 0 && FX.rates[pay] > 0;
+      const k = conv ? FX.rates[pol] / FX.rates[pay] : 1;
+      const M = v => sym(pol) + " " + money(v);
+      const C = v => sym(pay) + " " + money(v * k);
+      const X = v => conv ? '<div class="x">≈ ' + C(v) + "</div>" : "";
+
+      const topupComm = (p.topup > 0 ? num($("topup").value) : 0) * p.topup / 100;
+      const exc = (hasExcess ? num($("excess").value) : 0) * p.excess / 100;
       let first = 0, renew = 0, excTotal = 0, body = "";
       for (let i = 0; i < n; i++) {
         const rate = r.years[Math.min(i, r.years.length - 1)];
         const base = premium * rate / 100;
         const extra = i === 0 && p.special ? base * p.bonus / 100 : 0;
-        if (i === 0) first = base + extra + exc; else renew += base + exc;
+        const sum = base + extra + exc;
+        if (i === 0) first = sum; else renew += sum;
         excTotal += exc;
-        body += "<tr><td>第 " + (i + 1) + " 年" + (i === 0 ? "（首年）" : "（續保）") +
-          (limit > 0 ? "｜" + (age + i) + " 歲" : "") + "</td><td>" + pct(rate) + "</td><td>" +
-          money(base) + "</td>" + (hasExcess ? "<td>" + money(exc) + "</td>" : "") + "<td>" + (extra ? money(extra) : "—") + "</td><td>" + money(base + extra + exc) + "</td></tr>";
+        body += "<tr" + (i === 0 ? ' class="fy"' : "") + "><td>" + esc(t("yr", i + 1, i === 0) + (limit > 0 ? t("ageSfx", age + i) : "")) + '</td><td><span class="pill">' + pct(rate) + "</span></td><td>" +
+          money(base) + "</td>" + (hasExcess ? "<td>" + money(exc) + "</td>" : "") + "<td>" + (extra ? money(extra) : "—") + '</td><td class="sum">' + money(sum) + "</td>" +
+          (conv ? '<td class="cv">' + money(sum * k) + "</td>" : "") + "</tr>";
       }
       if (p.topup > 0) {
-        body += "<tr><td>額外整付保費</td><td>" + pct(p.topup) + "</td><td>" + money(topupComm) + "</td>" + (hasExcess ? "<td>—</td>" : "") + "<td>—</td><td>" + money(topupComm) + "</td></tr>";
+        body += "<tr><td>" + esc(t("topupRow")) + '</td><td><span class="pill">' + pct(p.topup) + "</span></td><td>" + money(topupComm) + "</td>" + (hasExcess ? "<td>—</td>" : "") +
+          '<td>—</td><td class="sum">' + money(topupComm) + "</td>" + (conv ? '<td class="cv">' + money(topupComm * k) + "</td>" : "") + "</tr>";
       }
       const total = first + renew + topupComm;
       const excluded = [];
       if (p.trailer > 0) excluded.push("Trailer Fee");
-      if (pfValid(p)) excluded.push("公積金");
-      const totalLabel = (p.ongoing ? "首 " + n + " 年佣金總額" : "佣金總額") + (excluded.length ? "（不含 " + excluded.join("及") + "）" : "");
+      if (pfValid(p)) excluded.push(t("pf"));
+      const totalLabel = t("total", p.ongoing, n) + (excluded.length ? t("excl", excluded) : "");
 
-      if (m.length > 1) html += '<div class="msg warn">有 ' + m.length + " 行資料同時符合，現用第一行計算，請檢查年齡段是否重疊。</div>";
-      if (capped) html += '<div class="msg warn">' + (payTo ? "此產品的保費繳付至 " + limit + " 歲，" : "此產品只可續保至 " + limit + " 歲生日前一個保障週年日，") + age + " 歲投保最多繳付 " + maxN + " 年保費，計算年數已調整為 " + maxN + " 年。</div>";
+      if (m.length > 1) html += '<div class="msg warn">' + esc(t("multi", m.length)) + "</div>";
+      if (capped) html += '<div class="msg warn">' + esc(t("capped", payTo, limit, age, maxN)) + "</div>";
       html += '<div class="stats">' +
-        '<div class="stat"><div class="k">首年佣金</div><div class="v">' + money(first) + "</div></div>" +
-        (n > 1 ? '<div class="stat"><div class="k">續保佣金合計</div><div class="v">' + money(renew) + "</div></div>" : "") +
-        (hasExcess ? '<div class="stat"><div class="k">其中超額保費佣金</div><div class="v">' + money(excTotal) + "</div></div>" : "") +
-        (p.topup > 0 ? '<div class="stat"><div class="k">額外整付保費佣金</div><div class="v">' + money(topupComm) + "</div></div>" : "") +
-        '<div class="stat main"><div class="k">' + totalLabel + '</div><div class="v">' + money(total) + "</div></div></div>";
-      html += '<div class="scroll"><table><thead><tr><th>項目</th><th>' + (hasExcess ? "目標保費佣金率" : "佣金率") + "</th><th>" + (hasExcess ? "目標保費佣金" : "基本佣金") + "</th>" +
-        (hasExcess ? "<th>超額保費佣金（" + pct(p.excess) + "）</th>" : "") + "<th>額外佣金</th><th>合計</th></tr></thead><tbody>" +
-        body + '</tbody><tfoot><tr><td colspan="' + (hasExcess ? 5 : 4) + '">' + totalLabel + "</td><td>" + money(total) + "</td></tr></tfoot></table></div>";
-      html += '<div class="hint">適用年齡段：' + rangeLabel(r) + " 歲。" +
-        (termNum ? "保費繳付期 " + termNum + " 年。" : "") +
-        (n > 1 ? "續保佣金假設每年保費不變，而且保單持續生效。" : "") +
-        (hasExcess ? "超額保費佣金假設每年超額保費相同；保額層增加後的佣金未計算。" : "") +
-        (p.ongoing ? "第 " + r.years.length + " 年的佣金率（" + pct(r.years[r.years.length - 1]) + "）適用於其後所有年度。" : "") +
-        (limit > 0 ? (payTo ? "保費繳付至 " : "續保年齡上限 ") + limit + " 歲，" + age + " 歲投保最多繳付 " + maxN + " 年保費。" : "") + "</div>";
+        '<div class="stat"><div class="k">' + esc(t("first")) + '</div><div class="v">' + M(first) + "</div>" + X(first) + "</div>" +
+        (n > 1 ? '<div class="stat"><div class="k">' + esc(t("renew")) + '</div><div class="v">' + M(renew) + "</div>" + X(renew) + "</div>" : "") +
+        (hasExcess ? '<div class="stat"><div class="k">' + esc(t("excPart")) + '</div><div class="v">' + M(excTotal) + "</div>" + X(excTotal) + "</div>" : "") +
+        (p.topup > 0 ? '<div class="stat"><div class="k">' + esc(t("topupC")) + '</div><div class="v">' + M(topupComm) + "</div>" + X(topupComm) + "</div>" : "") +
+        '<div class="stat main"><div class="k">' + esc(totalLabel) + '</div><div class="v">' + M(total) + "</div>" + X(total) + "</div></div>";
+      if (conv) {
+        const w = fxWarn();
+        html += '<div class="fxbox">1 ' + pol + " = " + k.toFixed(4) + " " + pay + (pol !== "HKD" && pay !== "HKD" ? esc(t("fxCross")) : "") + "　｜　" + esc(fxStatusText()) +
+          (w ? '　<span class="w">⚠ ' + esc(w) + "</span>" : "") + '<div class="hint">' + esc(t("fxNote")) + "</div></div>";
+      }
+      html += '<div class="scroll"><table><thead><tr><th>' + esc(t("thItem")) + "</th><th>" + esc(t(hasExcess ? "thRateT" : "thRate")) + "</th><th>" + esc(t(hasExcess ? "thBaseT" : "thBase")) + "（" + pol + "）</th>" +
+        (hasExcess ? "<th>" + esc(t("thExc", pct(p.excess))) + "</th>" : "") + "<th>" + esc(t("thExtra")) + "</th><th>" + esc(t("thSum")) + "（" + pol + "）</th>" +
+        (conv ? "<th>" + esc(t("thConv", pay)) + "</th>" : "") + "</tr></thead><tbody>" + body +
+        '</tbody><tfoot><tr><td colspan="' + (hasExcess ? 5 : 4) + '">' + esc(totalLabel) + '</td><td class="sum">' + money(total) + "</td>" +
+        (conv ? '<td class="cv">' + money(total * k) + "</td>" : "") + "</tr></tfoot></table></div>";
+      html += '<div class="hint">' + esc(t("band", rangeLabel(r)) + (termNum ? t("payTerm", termNum) : "") + (n > 1 ? t("assume") : "") + (hasExcess ? t("excAssume") : "") +
+        (p.ongoing ? t("lastRate", r.years.length, pct(r.years[r.years.length - 1])) : "") + (limit > 0 ? t("limitNote", payTo, limit, age, maxN) : "")) + "</div>";
 
       if (pfValid(p)) {
         const payYears = termNum || maxN;
         let pfTotal = 0, lines = "";
-        p.pfTiers.forEach(t => {
-          const last = payYears ? Math.min(t.end, payYears) : (t.end >= PF_OPEN ? n : t.end);
-          const cnt = Math.max(0, last - t.start + 1);
-          const yearly = premium * t.rate / 100;
+        p.pfTiers.forEach(x => {
+          const last = payYears ? Math.min(x.end, payYears) : (x.end >= PF_OPEN ? n : x.end);
+          const cnt = Math.max(0, last - x.start + 1), yearly = premium * x.rate / 100;
           pfTotal += yearly * cnt;
-          lines += "<br>" + (cnt > 0
-            ? "第 " + t.start + (last > t.start ? "–" + last : "") + " 年：保費的 " + pct(t.rate) + "，每年 <b>" + money(yearly) + "</b>，共 " + cnt + " 年 <b>" + money(yearly * cnt) + "</b>"
-            : tierYears(t) + "（" + pct(t.rate) + "）：超出保費繳付期，不適用");
+          lines += "<br>" + (cnt > 0 ? t("pfLine", x.start, last, pct(x.rate), M(yearly), cnt, M(yearly * cnt)) : esc(t("pfNa", tierYears(x), pct(x.rate))));
         });
-        html += '<div class="pfbox"><b>公積金</b>：' + pfLabel(p) + "，不計入上面的佣金總額。" + lines +
-          "<br>按保費 " + money(premium) + " 估算，公積金合計 <b>" + money(pfTotal) + "</b>。" +
-          "<br>" + (payYears
-            ? (termNum ? "保費繳付期 " + termNum + " 年" : "保費繳付至 " + limit + " 歲，" + age + " 歲投保共繳付 " + payYears + " 年") + "，公積金只計算至繳付期完結；"
-            : "假設該年度仍然繳付保費；") + "假設每年保費不變，而且保單持續生效。</div>";
+        html += '<div class="pfbox">' + t("pfHead", esc(pfLabel(p))) + lines + "<br>" + t("pfTotal", M(premium), M(pfTotal)) + (conv ? "（≈ " + C(pfTotal) + "）" : "") + "<br>" +
+          esc((payYears ? (termNum ? t("pfTailTerm", termNum) : t("pfTailTo", limit, age, payYears)) : t("pfTailNone")) + t("pfTailEnd")) + "</div>";
       }
-
       if (p.trailer > 0) {
         const av = num($("av").value);
-        html += '<div class="trailer"><b>Trailer Fee</b>：由第 ' + p.trailerStart + " 個保單年度起，每月派發戶口價值 × " + pct(p.trailer) + " ÷ 12，保單必須仍然生效。";
+        html += '<div class="trailer">' + t("trHead", p.trailerStart, pct(p.trailer)) + "<br>";
         if (av > 0) {
-          const monthly = av * p.trailer / 100 / 12;
-          html += "<br>按戶口價值 " + money(av) + " 估算：每月約 <b>" + money(monthly) + "</b>，每年約 <b>" + money(monthly * 12) + "</b>。";
-        } else {
-          html += "<br>輸入「預計戶口價值」可估算金額。";
-        }
+          const mo = av * p.trailer / 100 / 12;
+          html += t("trEst", M(av), M(mo) + (conv ? "（≈ " + C(mo) + "）" : ""), M(mo * 12) + (conv ? "（≈ " + C(mo * 12) + "）" : ""));
+        } else html += esc(t("trHint"));
         html += "</div>";
       }
       $("result").innerHTML = html;
     }
 
+    /* ===== 載入及事件 ===== */
     function load(pText, rText) {
       products = parseProducts(pText);
       rates = parseRates(rText);
+      buildGroups();
+      if (!curGroup()) { ST.g = null; ST.open = true; }
       $("pText").value = pText;
       $("rText").value = rText;
-      fillCats();
-      fillProducts();
-      renderChecks();
-      renderList();
+      fillTerms($("term").value);
+      renderPicker(); renderChecks(); renderList(); calc();
     }
+    function applyLang() {
+      initConv();
+      document.documentElement.lang = lang === "en" ? "en" : (lang === "sc" ? "zh-Hans" : "zh-Hant");
+      document.title = t("title");
+      document.querySelectorAll("[data-i]").forEach(e => { e.textContent = t(e.dataset.i); });
+      document.querySelectorAll("[data-ph]").forEach(e => { e.placeholder = t(e.dataset.ph); });
+      document.querySelectorAll("#lang button").forEach(b => b.classList.toggle("active", b.dataset.l === lang));
+      $("dataEnNote").textContent = t("dataEnNote");
+      fillCur(); renderFx(true);
+      fillTerms($("term").value);
+      renderPicker(); renderChecks(); renderList(); calc();
+    }
+    window.onOpenCC = () => { initConv(); if (lang === "sc") applyLang(); };
 
-    document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => {
-      document.querySelectorAll(".tab").forEach(x => x.classList.toggle("active", x === t));
-      $("calc").classList.toggle("hidden", t.dataset.tab !== "calc");
-      $("data").classList.toggle("hidden", t.dataset.tab !== "data");
+    $("lang").addEventListener("click", e => {
+      const b = e.target.closest("button");
+      if (!b) return;
+      lang = b.dataset.l; store.set(KEY_LANG, lang); applyLang();
+    });
+    document.querySelectorAll(".tab").forEach(x => x.addEventListener("click", () => {
+      document.querySelectorAll(".tab").forEach(y => y.classList.toggle("active", y === x));
+      $("calc").classList.toggle("hidden", x.dataset.tab !== "calc");
+      $("data").classList.toggle("hidden", x.dataset.tab !== "data");
     }));
-    $("cat").addEventListener("change", fillProducts);
-    $("product").addEventListener("change", fillTerms);
-    $("showOff").addEventListener("change", fillProducts);
+    $("seg").addEventListener("click", e => { const b = e.target.closest("button"); if (b) { ST.status = b.dataset.s; renderPicker(); } });
+    $("chips").addEventListener("click", e => { const b = e.target.closest("button"); if (b) { ST.cat = b.dataset.c; renderPicker(); } });
+    $("q").addEventListener("input", renderPicker);
+    $("plist").addEventListener("click", e => {
+      const it = e.target.closest(".pitem");
+      if (!it) return;
+      ST.g = groups[Number(it.dataset.k)].key; ST.open = false;
+      fillTerms(""); renderPicker(); calc();
+    });
+    $("pickSel").addEventListener("click", e => { if (e.target.closest("#chg")) { ST.open = true; renderPicker(); } });
     ["term", "age", "premium", "excess", "nYears", "topup", "av"].forEach(id => $(id).addEventListener("input", calc));
+    ["polCur", "payCur"].forEach(id => $(id).addEventListener("change", () => { store.set(KEY_CUR, $("polCur").value + "|" + $("payCur").value); calc(); }));
+    $("fxUrl").value = store.get(KEY_FXURL, "");
+    $("fxReload").addEventListener("click", () => { store.set(KEY_FXURL, $("fxUrl").value.trim()); loadFx(); });
+    $("fxGrid").addEventListener("input", e => {
+      const c = e.target.dataset.c, v = parseFloat(e.target.value);
+      if (c && v > 0) { FX.rates[c] = v; FX.source = "manual"; renderFx(false); calc(); }
+    });
     $("save").addEventListener("click", () => {
-      store.set(KEY_P, $("pText").value);
-      store.set(KEY_R, $("rText").value);
+      store.set(KEY_P, $("pText").value); store.set(KEY_R, $("rText").value);
       load($("pText").value, $("rText").value);
-      $("saveMsg").innerHTML = '<div class="msg ok">資料已更新，請查看上方的資料檢查結果。</div>';
+      $("saveMsg").innerHTML = '<div class="msg ok">' + esc(t("saved")) + "</div>";
     });
     $("reset").addEventListener("click", () => {
-      store.set(KEY_P, DEF_P);
-      store.set(KEY_R, DEF_R);
-      load(DEF_P, DEF_R);
-      $("saveMsg").innerHTML = '<div class="msg ok">已還原預設資料。</div>';
+      const a = HAS_DEF ? DEF_P : "", b = HAS_DEF ? DEF_R : "";
+      store.set(KEY_P, a); store.set(KEY_R, b);
+      load(a, b);
+      $("saveMsg").innerHTML = '<div class="msg ok">' + esc(t("resetDone")) + "</div>";
     });
 
-    load(store.get(KEY_P, DEF_P), store.get(KEY_R, DEF_R));
+    load(store.get(KEY_P, HAS_DEF ? DEF_P : ""), store.get(KEY_R, HAS_DEF ? DEF_R : ""));
+    applyLang();
+    loadFx();
   </script>
   </body>
   </html>
