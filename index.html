@@ -108,28 +108,30 @@
     .stat.main .k { color:rgba(255,255,255,.85); font-size:13px; }
     .stat.main .v { font-size:38px; line-height:1.15; margin-top:6px; }
     .stat.main .x { color:#f6dfa8; font-size:18px; margin-top:4px; }
-    .fxbox { background:#eefaf7; border:1px solid #c2ebe4; border-left:4px solid #1a9484; border-radius:12px; padding:10px 14px; font-size:13px; color:#136259; margin-bottom:16px; }
-    .fxbox .w { color:#86560a; font-weight:700; }
+    .fxbox { display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 14px; background:#eefaf7; border:1px solid #c2ebe4; border-left:4px solid #1a9484; border-radius:12px; padding:10px 14px; font-size:13px; color:#136259; margin-bottom:16px; }
+    .fxbox span { white-space:nowrap; }
+    .fxbox .fxr { font-weight:800; font-size:15px; }
+    .fxbox .w { color:#86560a; font-weight:700; white-space:normal; }
 
     .scroll { overflow-x:auto; border-radius:14px; border:1px solid var(--line); box-shadow:0 6px 18px -12px rgba(31,26,28,.25); }
     table { width:100%; border-collapse:collapse; font-size:14px; background:#fff; }
     th, td { padding:11px 14px; text-align:right; white-space:nowrap; }
-    thead th { background:linear-gradient(135deg,#7a0f26,#b3153a); color:#fff; font-size:12px; font-weight:700; letter-spacing:.05em; border-bottom:3px solid var(--gold); }
+    thead th { background:#4a0f1f; color:#fff; font-size:12px; font-weight:700; letter-spacing:.05em; }
     td { border-bottom:1px solid #f0ebe5; }
     td:first-child, th:first-child, td.l, th.l { text-align:left; }
     td.c, th.c { text-align:center; }
     tbody tr:nth-child(even) td { background:#fbf8f4; }
-    tbody tr:hover td { background:#fdf3e3; }
-    #result tbody tr.fy td { background:var(--brand-soft); font-weight:700; }
-    #result tbody td:first-child { box-shadow:inset 4px 0 0 #ead9c2; font-weight:600; }
-    #result tbody tr.fy td:first-child { box-shadow:inset 4px 0 0 var(--brand); }
-    .pill { display:inline-block; min-width:54px; text-align:center; padding:2px 10px; border-radius:999px; background:#fbf1dc; color:#8a5a0b; font-weight:700; font-size:13px; }
+    #list tbody tr:hover td { background:#fdf3e3; }
+    #result tbody td:first-child { font-weight:700; }
+    #result tbody tr.fy td { background:#fff6e3; font-weight:700; }
+    #result tbody tr.fy td:first-child { box-shadow:inset 4px 0 0 var(--gold); color:var(--brand-deep); }
+    .pill { display:inline-block; min-width:54px; text-align:center; padding:2px 10px; border-radius:999px; background:#f1ede8; color:#4a4346; font-weight:700; font-size:13px; }
     tr.fy .pill { background:var(--brand); color:#fff; }
     td.sum { font-weight:800; color:var(--brand-deep); }
     td.cv { font-weight:700; color:var(--teal); }
-    tfoot td { font-weight:800; background:#2b1a1f; color:#fff; border:0; }
-    tfoot td.sum { color:#f6dfa8; }
-    tfoot td.cv { color:#9fe3d8; }
+    tfoot td { font-weight:800; background:#7a0f26; color:#fff; border:0; }
+    tfoot td.sum { color:#f6dfa8; font-size:16px; }
+    tfoot td.cv { color:#bdf0e6; }
     tr.offrow td { color:#a8a1a4; }
     #list { max-height:580px; overflow:auto; }
     #list table { font-size:13px; }
@@ -154,7 +156,27 @@
     footer { max-width:1180px; margin:0 auto; padding:0 20px 36px; font-size:12px; color:var(--muted); text-align:center; }
     .hidden { display:none !important; }
     @media (min-width:980px) { .layout { grid-template-columns:400px minmax(0,1fr); align-items:start; } .info .remark ul { columns:2; column-gap:32px; } }
-    @media (max-width:640px) { header { padding:22px 18px 96px; } header h1 { font-size:27px; } main { padding:0 14px; } .card, .info { padding:18px; } .tab { padding:9px 16px; } .stat.main .v { font-size:30px; } }
+    @media (max-width:640px) {
+      header { padding:22px 18px 96px; } header h1 { font-size:27px; } main { padding:0 14px; } .card, .info { padding:18px; } .tab { padding:9px 16px; } .stat.main .v { font-size:30px; }
+      /* 手機：結果表格改為逐年卡片，不用橫向拖動 */
+      #result .scroll { overflow:visible; border:0; box-shadow:none; border-radius:0; }
+      #result table { background:transparent; }
+      #result thead { display:none; }
+      #result table, #result tbody, #result tfoot, #result tr { display:block; }
+      #result tr { background:#fff; border:1px solid var(--line); border-radius:14px; overflow:hidden; margin-bottom:10px; }
+      #result td { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:9px 14px; white-space:normal; border-bottom:1px dashed #efe9e2; background:#fff !important; box-shadow:none !important; }
+      #result td:last-child { border-bottom:0; }
+      #result td::before { content:attr(data-l); flex:1; text-align:left; color:var(--muted); font-size:12px; font-weight:700; }
+      #result td:first-child { background:var(--soft) !important; font-weight:800; justify-content:flex-start; }
+      #result td:first-child::before { content:none; }
+      #result tr.fy { border-color:#e6c98f; }
+      #result tbody tr.fy td:first-child { background:#fff1d6 !important; color:var(--brand-deep); }
+      #result tfoot tr { border:0; margin-bottom:0; }
+      #result tfoot td { background:#7a0f26 !important; color:#fff; border-bottom-color:rgba(255,255,255,.2); }
+      #result tfoot td::before { color:rgba(255,255,255,.78); }
+      #result tfoot td:first-child { background:#5c0b1d !important; }
+      #result tfoot td.sum { font-size:18px; }
+    }
   </style>
   </head>
   <body>
@@ -192,11 +214,11 @@
         <div class="grid">
           <div class="full"><label><span class="stepno">2</span><span data-i="lTerm"></span></label><select id="term"></select></div>
           <div><label><span class="stepno">3</span><span data-i="lAge"></span></label><input id="age" type="number" inputmode="numeric" min="0" step="1" data-ph="agePh"><div class="hint" data-i="ageHint"></div></div>
-          <div><label><span class="stepno">4</span><span id="premiumLabel"></span></label><input id="premium" type="number" inputmode="decimal" min="0" data-ph="premPh"><div class="hint" id="premiumHint"></div></div>
-          <div id="excessWrap"><label data-i="lExcess"></label><input id="excess" type="number" min="0" value="0"><div class="hint" data-i="excessHint"></div></div>
+          <div><label><span class="stepno">4</span><span id="premiumLabel"></span></label><input id="premium" type="text" inputmode="decimal" autocomplete="off" data-ph="premPh"><div class="hint" id="premiumHint"></div></div>
+          <div id="excessWrap"><label data-i="lExcess"></label><input id="excess" type="text" inputmode="decimal" autocomplete="off" value="0"><div class="hint" data-i="excessHint"></div></div>
           <div id="yearsWrap"><label data-i="lYears"></label><input id="nYears" type="number" min="1" max="50" step="1" value="10"><div class="hint" data-i="yearsHint"></div></div>
-          <div id="topupWrap"><label data-i="lTopup"></label><input id="topup" type="number" min="0" value="0"></div>
-          <div id="avWrap"><label data-i="lAv"></label><input id="av" type="number" min="0" value="0"><div class="hint" data-i="avHint"></div></div>
+          <div id="topupWrap"><label data-i="lTopup"></label><input id="topup" type="text" inputmode="decimal" autocomplete="off" value="0"></div>
+          <div id="avWrap"><label data-i="lAv"></label><input id="av" type="text" inputmode="decimal" autocomplete="off" value="0"><div class="hint" data-i="avHint"></div></div>
           <div><label data-i="lPolCur"></label><select id="polCur"></select></div>
           <div><label data-i="lPayCur"></label><select id="payCur"></select></div>
           <div class="full">
@@ -255,6 +277,7 @@
   <script>
     const HAS_DEF = typeof DEF_P !== "undefined" && typeof DEF_R !== "undefined";
     const KEY_P = "comm_products_v34", KEY_R = "comm_rates_v34", KEY_LANG = "comm_lang", KEY_FXURL = "comm_fx_url", KEY_CUR = "comm_cur";
+    const FX_DEFAULT_URL = "https://lucaschan729.github.io/fx/rates.json";
     const $ = id => document.getElementById(id);
     const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
     const num = s => parseFloat(String(s == null ? "" : s).replace(/[%,\s]/g, "")) || 0;
@@ -269,6 +292,15 @@
       get(k, d) { try { return localStorage.getItem(k) || d; } catch (e) { return d; } },
       set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
     };
+    // 金額輸入框：自動加千位逗號
+    function fmtAmount(el) {
+      let v = el.value.replace(/[^\d.]/g, "");
+      const i = v.indexOf(".");
+      if (i >= 0) v = v.slice(0, i + 1) + v.slice(i + 1).replace(/\./g, "");
+      const p = v.split(".");
+      p[0] = p[0].replace(/^0+(?=\d)/, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      el.value = p.join(".");
+    }
 
     /* ===== 語言 ===== */
     let lang = store.get(KEY_LANG, "tc");
@@ -283,15 +315,15 @@
       search: "搜尋產品名稱或代碼", change: "更改產品", noMatch: "沒有符合的產品，請更改篩選條件。",
       noData: "未載入產品資料：請把 data.js 放在與本頁相同的資料夾，或到「佣金資料管理」貼上產品主檔和佣金率表，再按「更新資料」。",
       lTerm: "繳付年期", termPh: "請選擇繳付年期", termNone: "請先選擇產品",
-      lAge: "投保年齡", ageHint: "投保時的實際年齡", agePh: "例如 35", premPh: "例如 10000",
+      lAge: "投保年齡", ageHint: "投保時的實際年齡", agePh: "例如 35", premPh: "例如 10,000",
       premAnnual: "年繳保費", premSingle: "整付保費", premOnce: "保費", premTarget: "每年目標保費",
       premHintM: "月繳保單請輸入全年合計（月繳保費 × 12）", premHintT: "目標保費可於建議書找到",
       lExcess: "每年超額保費（如有）", excessHint: "超額保費 = 設定保費 − 目標保費",
       lYears: "計算年數", yearsHint: "最後一個佣金率適用於其後年度",
       lTopup: "額外整付保費（如有）", lAv: "預計戶口價值（選填）", avHint: "用來估算 Trailer Fee",
       lPolCur: "保單貨幣", lPayCur: "佣金顯示貨幣",
-      fxSettings: "匯率設定", fxUrl: "匯率檔網址（匯率網站的 rates.json）",
-      fxUrlHint: "貼上匯率網站 rates.json 的完整網址，再按「重新載入匯率」。如果本頁與匯率網站放在同一資料夾，會自動讀取，不用填。讀取失敗時使用內置匯率。",
+      fxSettings: "匯率設定", fxUrl: "匯率檔網址（選填）",
+      fxUrlHint: "已預設自動讀取匯率網站的當天匯率，一般不用填。如要改用其他來源，貼上 rates.json 的完整網址，再按「重新載入匯率」。讀取失敗時使用內置匯率。",
       fxReload: "重新載入匯率", fxManual: "手動輸入匯率（1 外幣兌港元）",
       fxNote: "匯率為友邦香港公佈的外幣兌港元匯率；佣金實際入賬匯率或有不同，換算結果僅供參考。",
       fxStatus: (d, s) => "匯率日期：" + d + "（" + s + "）",
@@ -353,21 +385,21 @@
       search: "Search product name or code", change: "Change", noMatch: "No matching product. Please change the filters.",
       noData: "No product data loaded. Put data.js in the same folder as this page, or paste the product master and rate table in the Commission data tab and press Update data.",
       lTerm: "Premium payment term", termPh: "Select a payment term", termNone: "Select a product first",
-      lAge: "Issue age", ageHint: "Actual age at issue", agePh: "e.g. 35", premPh: "e.g. 10000",
+      lAge: "Issue age", ageHint: "Actual age at issue", agePh: "e.g. 35", premPh: "e.g. 10,000",
       premAnnual: "Annual premium", premSingle: "Single premium", premOnce: "Premium", premTarget: "Annual target premium",
       premHintM: "For monthly mode, enter the full-year total (monthly premium × 12)", premHintT: "Target premium is shown in the proposal",
       lExcess: "Annual excess premium (if any)", excessHint: "Excess premium = planned premium − target premium",
       lYears: "Years to calculate", yearsHint: "The last rate applies to all later years",
       lTopup: "Lump-sum top-up (if any)", lAv: "Projected account value (optional)", avHint: "Used to estimate Trailer Fee",
       lPolCur: "Policy currency", lPayCur: "Show commission in",
-      fxSettings: "Exchange rate settings", fxUrl: "Rate file URL (rates.json of your FX site)",
-      fxUrlHint: "Paste the full URL of rates.json from your FX site and press Reload rates. If this page sits in the same folder as the FX site, it is read automatically. Built-in rates are used if loading fails.",
+      fxSettings: "Exchange rate settings", fxUrl: "Rate file URL (optional)",
+      fxUrlHint: "Today's rates are read automatically from the FX site, so this is normally left empty. To use another source, paste the full URL of its rates.json and press Reload rates. Built-in rates are used if loading fails.",
       fxReload: "Reload rates", fxManual: "Manual rates (1 unit to HKD)",
       fxNote: "Rates are AIA Hong Kong published rates against HKD. The rate actually applied to commission may differ; conversions are for reference only.",
       fxStatus: (d, s) => "Rate date: " + d + " (" + s + ")",
       srcAuto: "auto-updated", srcBuiltin: "built-in", srcManual: "manual",
       fxOld: "Rate date is not today. Please verify.", fxManualWarn: "Using manually entered rates. Please verify.",
-      fxCross: " (cross rate via HKD)",
+      fxCross: "(cross rate via HKD)",
       gTitle: "Get started", gIntro: "Complete the steps below. The result appears instantly:",
       g1: "Select a product (filter by status or category, or search)", g2: "Select the premium payment term", g3: "Enter the issue age", g4: "Enter the premium amount",
       g5: "Optional: choose the policy currency and display currency to convert the commission.",
@@ -457,7 +489,7 @@
       return j;
     }
     async function loadFx() {
-      const urls = [store.get(KEY_FXURL, "").trim(), "https://lucaschan729.github.io/fx/rates.json"].filter(Boolean);
+      const urls = [store.get(KEY_FXURL, "").trim(), FX_DEFAULT_URL, "rates.json"].filter(Boolean);
       let j = null;
       for (const u of urls) { try { j = await fetchRates(u); break; } catch (e) {} }
       const d = j || BUILTIN;
@@ -614,7 +646,6 @@
           else if (g[i].min > g[i - 1].max + 1) out.push(["warn", label + "年齡段有空隙：" + (g[i - 1].max + 1) + " 至 " + (g[i].min - 1) + " 歲沒有佣金率"]);
         }
       });
-      // 合併顯示的產品：繳付年期不可重複
       groups.filter(g => g.members.length > 1).forEach(g => {
         const ts = groupTerms(g).map(x => x.term);
         ts.filter((x, i) => ts.indexOf(x) !== i).forEach(x => out.push(["err", g.codes + " 合併顯示為「" + g.zh + "」，但繳付年期「" + x + "」重複，請修改名稱或繳付年期"]));
@@ -723,6 +754,8 @@
         [1, 2, 3, 4].map((n, i) => '<li class="' + (done[i] ? "done" : (i === cur ? "now" : "")) + '"><span class="gn">' + (done[i] ? "✓" : n) + "</span>" + esc(t("g" + n)) + "</li>").join("") +
         '</ol><div class="hint">' + esc(t("g5")) + "</div></div>";
     }
+    // 表格儲存格：data-l 供手機卡片版顯示欄名
+    const cell = (label, html, cls) => "<td" + (cls ? ' class="' + cls + '"' : "") + ' data-l="' + esc(label) + '">' + html + "</td>";
     function calc() {
       const g = curGroup(), tv = $("term").value, i0 = tv.indexOf("|");
       const code = i0 > 0 ? tv.slice(0, i0) : "", term = i0 > 0 ? tv.slice(i0 + 1) : "";
@@ -744,7 +777,8 @@
       const r = m[0];
       if (r.years.length === 0) { $("result").innerHTML = html + '<div class="msg err">' + esc(t("emptyRow")) + "</div>"; return; }
       const termNum = isNum(term) ? Number(term) : 0;
-      const hasExcess = p.excess > 0, payTo = isPayTo(term), limit = termLimit(term) || p.renewLimit;
+      const hasExcess = p.excess > 0, hasExtra = p.special && p.bonus > 0;
+      const payTo = isPayTo(term), limit = termLimit(term) || p.renewLimit;
       let n = r.years.length;
       if (p.ongoing) n = Math.min(50, Math.max(1, Math.round(num($("nYears").value)) || r.years.length));
       let maxN = 0, capped = false;
@@ -759,6 +793,15 @@
       const M = v => sym(pol) + " " + money(v);
       const C = v => sym(pay) + " " + money(v * k);
       const X = v => conv ? '<div class="x">≈ ' + C(v) + "</div>" : "";
+      // 欄名
+      const L = {
+        rate: t(hasExcess ? "thRateT" : "thRate"),
+        base: t(hasExcess ? "thBaseT" : "thBase") + "（" + pol + "）",
+        exc: hasExcess ? t("thExc", pct(p.excess)) : "",
+        extra: t("thExtra"),
+        sum: t("thSum") + "（" + pol + "）",
+        conv: t("thConv", pay)
+      };
 
       const topupComm = (p.topup > 0 ? num($("topup").value) : 0) * p.topup / 100;
       const exc = (hasExcess ? num($("excess").value) : 0) * p.excess / 100;
@@ -766,17 +809,19 @@
       for (let i = 0; i < n; i++) {
         const rate = r.years[Math.min(i, r.years.length - 1)];
         const base = premium * rate / 100;
-        const extra = i === 0 && p.special ? base * p.bonus / 100 : 0;
+        const extra = i === 0 && hasExtra ? base * p.bonus / 100 : 0;
         const sum = base + extra + exc;
         if (i === 0) first = sum; else renew += sum;
         excTotal += exc;
-        body += "<tr" + (i === 0 ? ' class="fy"' : "") + "><td>" + esc(t("yr", i + 1, i === 0) + (limit > 0 ? t("ageSfx", age + i) : "")) + '</td><td><span class="pill">' + pct(rate) + "</span></td><td>" +
-          money(base) + "</td>" + (hasExcess ? "<td>" + money(exc) + "</td>" : "") + "<td>" + (extra ? money(extra) : "—") + '</td><td class="sum">' + money(sum) + "</td>" +
-          (conv ? '<td class="cv">' + money(sum * k) + "</td>" : "") + "</tr>";
+        body += "<tr" + (i === 0 ? ' class="fy"' : "") + "><td>" + esc(t("yr", i + 1, i === 0) + (limit > 0 ? t("ageSfx", age + i) : "")) + "</td>" +
+          cell(L.rate, '<span class="pill">' + pct(rate) + "</span>") + cell(L.base, money(base)) +
+          (hasExcess ? cell(L.exc, money(exc)) : "") + (hasExtra ? cell(L.extra, extra ? money(extra) : "—") : "") +
+          cell(L.sum, money(sum), "sum") + (conv ? cell(L.conv, money(sum * k), "cv") : "") + "</tr>";
       }
       if (p.topup > 0) {
-        body += "<tr><td>" + esc(t("topupRow")) + '</td><td><span class="pill">' + pct(p.topup) + "</span></td><td>" + money(topupComm) + "</td>" + (hasExcess ? "<td>—</td>" : "") +
-          '<td>—</td><td class="sum">' + money(topupComm) + "</td>" + (conv ? '<td class="cv">' + money(topupComm * k) + "</td>" : "") + "</tr>";
+        body += "<tr><td>" + esc(t("topupRow")) + "</td>" + cell(L.rate, '<span class="pill">' + pct(p.topup) + "</span>") + cell(L.base, money(topupComm)) +
+          (hasExcess ? cell(L.exc, "—") : "") + (hasExtra ? cell(L.extra, "—") : "") +
+          cell(L.sum, money(topupComm), "sum") + (conv ? cell(L.conv, money(topupComm * k), "cv") : "") + "</tr>";
       }
       const total = first + renew + topupComm;
       const excluded = [];
@@ -794,14 +839,15 @@
         '<div class="stat main"><div class="k">' + esc(totalLabel) + '</div><div class="v">' + M(total) + "</div>" + X(total) + "</div></div>";
       if (conv) {
         const w = fxWarn();
-        html += '<div class="fxbox">1 ' + pol + " = " + k.toFixed(4) + " " + pay + (pol !== "HKD" && pay !== "HKD" ? esc(t("fxCross")) : "") + "　｜　" + esc(fxStatusText()) +
-          (w ? '　<span class="w">⚠ ' + esc(w) + "</span>" : "") + '<div class="hint">' + esc(t("fxNote")) + "</div></div>";
+        html += '<div class="fxbox"><span class="fxr">1 ' + pol + " = " + k.toFixed(4) + " " + pay + "</span>" +
+          (pol !== "HKD" && pay !== "HKD" ? "<span>" + esc(t("fxCross")) + "</span>" : "") +
+          "<span>" + esc(fxStatusText()) + "</span>" + (w ? '<span class="w">⚠ ' + esc(w) + "</span>" : "") + "</div>";
       }
-      html += '<div class="scroll"><table><thead><tr><th>' + esc(t("thItem")) + "</th><th>" + esc(t(hasExcess ? "thRateT" : "thRate")) + "</th><th>" + esc(t(hasExcess ? "thBaseT" : "thBase")) + "（" + pol + "）</th>" +
-        (hasExcess ? "<th>" + esc(t("thExc", pct(p.excess))) + "</th>" : "") + "<th>" + esc(t("thExtra")) + "</th><th>" + esc(t("thSum")) + "（" + pol + "）</th>" +
-        (conv ? "<th>" + esc(t("thConv", pay)) + "</th>" : "") + "</tr></thead><tbody>" + body +
-        '</tbody><tfoot><tr><td colspan="' + (hasExcess ? 5 : 4) + '">' + esc(totalLabel) + '</td><td class="sum">' + money(total) + "</td>" +
-        (conv ? '<td class="cv">' + money(total * k) + "</td>" : "") + "</tr></tfoot></table></div>";
+      html += '<div class="scroll"><table><thead><tr><th>' + esc(t("thItem")) + "</th><th>" + esc(L.rate) + "</th><th>" + esc(L.base) + "</th>" +
+        (hasExcess ? "<th>" + esc(L.exc) + "</th>" : "") + (hasExtra ? "<th>" + esc(L.extra) + "</th>" : "") + "<th>" + esc(L.sum) + "</th>" +
+        (conv ? "<th>" + esc(L.conv) + "</th>" : "") + "</tr></thead><tbody>" + body +
+        '</tbody><tfoot><tr><td colspan="' + (3 + (hasExcess ? 1 : 0) + (hasExtra ? 1 : 0)) + '">' + esc(totalLabel) + "</td>" + cell(L.sum, money(total), "sum") +
+        (conv ? cell(L.conv, money(total * k), "cv") : "") + "</tr></tfoot></table></div>";
       html += '<div class="hint">' + esc(t("band", rangeLabel(r)) + (termNum ? t("payTerm", termNum) : "") + (n > 1 ? t("assume") : "") + (hasExcess ? t("excAssume") : "") +
         (p.ongoing ? t("lastRate", r.years.length, pct(r.years[r.years.length - 1])) : "") + (limit > 0 ? t("limitNote", payTo, limit, age, maxN) : "")) + "</div>";
 
@@ -874,6 +920,7 @@
       fillTerms(""); renderPicker(); calc();
     });
     $("pickSel").addEventListener("click", e => { if (e.target.closest("#chg")) { ST.open = true; renderPicker(); } });
+    ["premium", "excess", "topup", "av"].forEach(id => $(id).addEventListener("input", e => fmtAmount(e.target)));
     ["term", "age", "premium", "excess", "nYears", "topup", "av"].forEach(id => $(id).addEventListener("input", calc));
     ["polCur", "payCur"].forEach(id => $(id).addEventListener("change", () => { store.set(KEY_CUR, $("polCur").value + "|" + $("payCur").value); calc(); }));
     $("fxUrl").value = store.get(KEY_FXURL, "");
